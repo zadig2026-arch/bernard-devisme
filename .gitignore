@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.gstack/
+
+# scraped legacy assets — too large for git, regenerable via scripts/scrape.mjs
+data/images/
+
+# session-specific preview state
+.claude/launch.json
+.claude/settings.local.json
+

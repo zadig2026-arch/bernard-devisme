@@ -1,65 +1,167 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArtworkCard } from "@/components/artwork-card";
+import { EmptyState } from "@/components/empty-state";
+import { PortableText } from "@/components/portable-text";
+import { sanityFetch } from "@/sanity/lib/fetch";
+import { homeQuery } from "@/sanity/lib/queries";
+import { formatDate } from "@/lib/format";
 
-export default function Home() {
+type HomeData = {
+  settings?: { intro?: unknown; agentInfo?: { name?: string; role?: string } };
+  featuredArtworks?: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    year?: number;
+    medium?: string[];
+    dimensions?: string;
+    images?: Array<unknown>;
+  }>;
+  series?: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    period?: string;
+    statement?: unknown;
+    coverArtwork?: { images?: Array<unknown>; title?: string };
+  }>;
+  latestJournal?: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    date?: string;
+    excerpt?: string;
+  }>;
+};
+
+export default async function HomePage() {
+  const data = await sanityFetch<HomeData>(homeQuery, {}, {});
+  const featured = data.featuredArtworks ?? [];
+  const series = data.series ?? [];
+  const journal = data.latestJournal ?? [];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="container-page py-16 md:py-24">
+      <section className="grid gap-10 md:grid-cols-12">
+        <div className="md:col-span-7">
+          <p className="eyebrow">Atelier — Nieul-les-Saintes</p>
+          <h1 className="heading-display mt-4 text-5xl md:text-7xl">Bernard&nbsp;Devisme</h1>
+          <p className="mt-6 prose-art text-[color:var(--color-ink-muted)]">
+            Peintre, sculpteur, infographiste. Diplômé des Beaux-Arts de Paris en 1970, élève
+            d&rsquo;Étienne Martin, Robert Couturier, César et Collamarini. Une œuvre traversant le
+            figuratif, l&rsquo;hyperréalisme et l&rsquo;abstrait, autour de la condition humaine et de
+            la <em>Divine Comédie</em> de Dante.
           </p>
+          <div className="mt-8 flex flex-wrap gap-4 text-sm">
+            <Link
+              href="/oeuvres"
+              className="border border-[color:var(--color-ink)] px-5 py-2.5 hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)] transition-colors"
+            >
+              Voir les œuvres
+            </Link>
+            <Link href="/parcours" className="px-5 py-2.5 underline underline-offset-4">
+              Parcours
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+        {featured[0] && (
+          <div className="md:col-span-5">
+            <ArtworkCard
+              slug={featured[0].slug}
+              title={featured[0].title}
+              year={featured[0].year}
+              medium={featured[0].medium}
+              dimensions={featured[0].dimensions}
+              image={featured[0].images?.[0] as never}
+              priority
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+          </div>
+        )}
+      </section>
+
+      {series.length > 0 && (
+        <section className="mt-28">
+          <header className="flex items-baseline justify-between">
+            <h2 className="heading-display text-3xl md:text-4xl">Séries</h2>
+            <Link href="/series" className="text-sm underline-offset-4 hover:underline">
+              Toutes les séries →
+            </Link>
+          </header>
+          <div className="hairline mt-6 grid gap-12 pt-10 md:grid-cols-3">
+            {series.map((s) => (
+              <Link key={s._id} href={`/series/${s.slug}`} className="group">
+                {Boolean(s.coverArtwork?.images?.[0]) && (
+                  <ArtworkCard slug="" title="" image={s.coverArtwork!.images![0] as never} />
+                )}
+                <p className="eyebrow mt-3">{s.period}</p>
+                <p className="heading-display mt-1 text-2xl italic">{s.title}</p>
+                <div className="mt-2 max-w-prose text-sm text-[color:var(--color-ink-muted)] line-clamp-3">
+                  <PortableText value={s.statement} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {featured.length > 1 && (
+        <section className="mt-28">
+          <header className="flex items-baseline justify-between">
+            <h2 className="heading-display text-3xl md:text-4xl">Œuvres choisies</h2>
+            <Link href="/oeuvres" className="text-sm underline-offset-4 hover:underline">
+              Catalogue complet →
+            </Link>
+          </header>
+          <div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            {featured.slice(1).map((a) => (
+              <ArtworkCard
+                key={a._id}
+                slug={a.slug}
+                title={a.title}
+                year={a.year}
+                medium={a.medium}
+                dimensions={a.dimensions}
+                image={a.images?.[0] as never}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {journal.length > 0 && (
+        <section className="mt-28">
+          <header className="flex items-baseline justify-between">
+            <h2 className="heading-display text-3xl md:text-4xl">Journal d&rsquo;atelier</h2>
+            <Link href="/journal" className="text-sm underline-offset-4 hover:underline">
+              Toutes les entrées →
+            </Link>
+          </header>
+          <ul className="hairline mt-6 divide-y divide-[color:var(--color-rule)] pt-2">
+            {journal.map((e) => (
+              <li key={e._id}>
+                <Link href={`/journal/${e.slug}`} className="grid gap-1 py-6 md:grid-cols-12">
+                  <span className="md:col-span-2 eyebrow">{formatDate(e.date)}</span>
+                  <span className="md:col-span-4 heading-display text-xl italic">{e.title}</span>
+                  {e.excerpt && (
+                    <span className="md:col-span-6 text-sm text-[color:var(--color-ink-muted)]">
+                      {e.excerpt}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {featured.length === 0 && series.length === 0 && journal.length === 0 && (
+        <section className="mt-20">
+          <EmptyState
+            title="Site en cours de migration"
+            body="Le contenu sera publié progressivement depuis l'atelier via le Studio. Connectez Sanity (NEXT_PUBLIC_SANITY_PROJECT_ID) pour activer le catalogue."
+          />
+        </section>
+      )}
     </div>
   );
 }
