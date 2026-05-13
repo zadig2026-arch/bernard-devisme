@@ -126,10 +126,6 @@ export default async function HomePage() {
           <div className="md:col-span-4 md:sticky md:top-24 md:self-start">
             <ArtworkCard
               slug={featured[0].slug}
-              title={featured[0].title}
-              year={featured[0].year}
-              medium={featured[0].medium}
-              dimensions={featured[0].dimensions}
               image={featured[0].images?.[0] as never}
               priority
             />
