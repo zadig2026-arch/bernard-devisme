@@ -44,25 +44,23 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
         </Link>
       </nav>
 
-      <header className="mt-8 grid gap-8 md:grid-cols-12">
+      <header className="mt-8 grid gap-6 md:grid-cols-12">
         <div className="md:col-span-8">
           <p className="eyebrow">Série · {s.period}</p>
-          <h1 className="heading-display mt-3 text-5xl md:text-7xl italic">{s.title}</h1>
+          <h1 className="heading-display mt-3 text-3xl md:text-4xl italic">{s.title}</h1>
         </div>
         <div className="md:col-span-4">
           <PortableText value={s.statement} />
         </div>
       </header>
 
-      <div className="hairline mt-16 grid gap-x-6 gap-y-14 pt-10 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="mt-10 grid gap-x-4 gap-y-8 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
         {s.artworks?.map((a, i) => (
           <ArtworkCard
             key={a._id}
             slug={a.slug}
             title={a.title}
             year={a.year}
-            medium={a.medium}
-            dimensions={a.dimensions}
             image={a.images?.[0] as never}
             priority={i < 4}
           />

@@ -43,10 +43,10 @@ export default async function ExhibitionPage({ params }: { params: Promise<{ slu
         <Link href="/expositions">← Toutes les expositions</Link>
       </nav>
 
-      <header className="mt-8 grid gap-8 md:grid-cols-12">
+      <header className="mt-8 grid gap-6 md:grid-cols-12">
         <div className="md:col-span-8">
           <p className="eyebrow">{e.type} · {formatDateRange(e.startDate, e.endDate)}</p>
-          <h1 className="heading-display mt-3 text-4xl md:text-6xl italic">{e.title}</h1>
+          <h1 className="heading-display mt-3 text-3xl md:text-4xl italic">{e.title}</h1>
           <p className="mt-2 text-[color:var(--color-ink-muted)]">
             {[e.venue, e.city].filter(Boolean).join(" · ")}
           </p>
@@ -57,13 +57,13 @@ export default async function ExhibitionPage({ params }: { params: Promise<{ slu
       </header>
 
       {Boolean(e.coverImage) && (
-        <div className="mt-12">
+        <div className="mt-10 max-w-3xl">
           <SanityImage source={e.coverImage as never} alt={e.title} priority />
         </div>
       )}
 
       {e.gallery && e.gallery.length > 0 && (
-        <section className="mt-16 grid gap-6 md:grid-cols-2">
+        <section className="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           {e.gallery.map((img, i) => (
             <SanityImage key={i} source={img as never} alt={img.caption ?? `Vue ${i + 1}`} />
           ))}
@@ -71,9 +71,9 @@ export default async function ExhibitionPage({ params }: { params: Promise<{ slu
       )}
 
       {e.artworks && e.artworks.length > 0 && (
-        <section className="mt-20">
-          <h2 className="heading-display text-2xl">Œuvres exposées</h2>
-          <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 md:grid-cols-4">
+        <section className="mt-16">
+          <h2 className="heading-display text-xl">Œuvres exposées</h2>
+          <div className="mt-6 grid gap-x-4 gap-y-8 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {e.artworks.map((a) => (
               <ArtworkCard
                 key={a._id}

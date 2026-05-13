@@ -39,21 +39,21 @@ export default async function JournalEntryPage({ params }: { params: Promise<{ s
 
       <header className="mt-8 max-w-3xl">
         <p className="eyebrow">{formatDate(e.date)}</p>
-        <h1 className="heading-display mt-3 text-4xl md:text-6xl italic">{e.title}</h1>
+        <h1 className="heading-display mt-3 text-3xl md:text-4xl italic">{e.title}</h1>
       </header>
 
       {e.images?.[0] && (
-        <div className="mt-12">
+        <div className="mt-10 max-w-3xl">
           <SanityImage source={e.images[0] as never} alt={e.title} priority />
         </div>
       )}
 
-      <div className="mt-12 max-w-3xl">
+      <div className="mt-10 max-w-3xl">
         <PortableText value={e.body} />
       </div>
 
       {e.images && e.images.length > 1 && (
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           {e.images.slice(1).map((img, i) => (
             <SanityImage key={i} source={img as never} alt={`${e.title} — ${i + 2}`} />
           ))}
@@ -61,9 +61,9 @@ export default async function JournalEntryPage({ params }: { params: Promise<{ s
       )}
 
       {e.relatedArtworks && e.relatedArtworks.length > 0 && (
-        <section className="mt-20">
-          <h2 className="heading-display text-2xl">Œuvres mentionnées</h2>
-          <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 md:grid-cols-4">
+        <section className="mt-16">
+          <h2 className="heading-display text-xl">Œuvres mentionnées</h2>
+          <div className="mt-6 grid gap-x-4 gap-y-8 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {e.relatedArtworks.map((a) => (
               <ArtworkCard
                 key={a._id}

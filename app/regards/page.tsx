@@ -28,7 +28,7 @@ export default async function RegardsPage() {
     <div className="container-page py-16 md:py-20">
       <header className="max-w-3xl">
         <p className="eyebrow">Regards d&rsquo;après…</p>
-        <h1 className="heading-display mt-3 text-4xl md:text-6xl">Textes critiques</h1>
+        <h1 className="heading-display mt-3 text-3xl md:text-5xl">Textes critiques</h1>
         <p className="mt-6 prose-art text-[color:var(--color-ink-muted)]">
           Au fil des années, des artistes, écrivains, critiques d&rsquo;art et responsables
           d&rsquo;institutions culturelles ont défendu ce travail. Voici leurs écrits.

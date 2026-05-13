@@ -1,24 +1,23 @@
 import Link from "next/link";
 
 const NAV = [
-  { href: "/oeuvres", label: "Œuvres" },
-  { href: "/series", label: "Séries" },
-  { href: "/expositions", label: "Expositions" },
-  { href: "/journal", label: "Journal" },
-  { href: "/parcours", label: "Parcours" },
-  { href: "/regards", label: "Regards" },
-  { href: "/contact", label: "Contact" },
+  { href: "/oeuvres/peinture", label: "Peinture" },
+  { href: "/oeuvres/sculpture", label: "Sculpture" },
+  { href: "/oeuvres/graphisme", label: "Graphisme" },
+  { href: "/oeuvres/infographies", label: "Infographies" },
+  { href: "/oeuvres/livres-objets", label: "Livres-objets et plus" },
+  { href: "/parcours", label: "Parcours et CV" },
 ];
 
 export function SiteHeader() {
   return (
     <header className="container-page sticky top-0 z-30 backdrop-blur-md bg-[color:var(--color-paper)]/85">
-      <div className="hairline-bottom flex items-baseline justify-between gap-6 py-5 border-b border-[color:var(--color-rule)]">
+      <div className="flex flex-col gap-3 py-5 border-b border-[color:var(--color-rule)] sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
         <Link href="/" className="heading-display text-xl tracking-tight">
           Bernard Devisme
         </Link>
-        <nav className="hidden md:block">
-          <ul className="flex flex-wrap items-baseline gap-6 text-sm">
+        <nav>
+          <ul className="flex flex-wrap items-baseline gap-x-5 gap-y-2 text-sm">
             {NAV.map((n) => (
               <li key={n.href}>
                 <Link
@@ -31,16 +30,6 @@ export function SiteHeader() {
             ))}
           </ul>
         </nav>
-        <details className="md:hidden">
-          <summary className="list-none cursor-pointer text-sm">Menu</summary>
-          <ul className="absolute right-4 mt-3 flex flex-col gap-3 rounded-md border border-[color:var(--color-rule)] bg-[color:var(--color-paper)] p-4 text-sm shadow-sm">
-            {NAV.map((n) => (
-              <li key={n.href}>
-                <Link href={n.href}>{n.label}</Link>
-              </li>
-            ))}
-          </ul>
-        </details>
       </div>
     </header>
   );

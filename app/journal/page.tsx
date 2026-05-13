@@ -25,7 +25,7 @@ export default async function JournalIndex() {
 
   return (
     <div className="container-page py-16 md:py-20">
-      <h1 className="heading-display text-4xl md:text-6xl">Journal d&rsquo;atelier</h1>
+      <h1 className="heading-display text-3xl md:text-5xl">Journal d&rsquo;atelier</h1>
       <p className="mt-4 max-w-2xl text-[color:var(--color-ink-muted)]">
         Notes, accrochages, expérimentations. Une chronique tenue depuis l&rsquo;atelier de
         Nieul-les-Saintes.

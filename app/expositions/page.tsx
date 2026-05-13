@@ -28,7 +28,7 @@ export default async function ExhibitionsIndex() {
 
   return (
     <div className="container-page py-16 md:py-20">
-      <h1 className="heading-display text-4xl md:text-6xl">Expositions</h1>
+      <h1 className="heading-display text-3xl md:text-5xl">Expositions</h1>
       {all.length === 0 && (
         <div className="mt-12">
           <EmptyState title="Aucune exposition publiée" />

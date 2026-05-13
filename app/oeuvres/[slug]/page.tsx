@@ -4,19 +4,18 @@ import type { Metadata } from "next";
 import { SanityImage } from "@/components/sanity-image";
 import { PortableText } from "@/components/portable-text";
 import { ArtworkCard } from "@/components/artwork-card";
+import { SeriesIndex, getCategoryMeta, CATEGORY_IDS } from "@/components/series-index";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { artworkBySlugQuery, allArtworkSlugsQuery } from "@/sanity/lib/queries";
 import { urlForImage } from "@/sanity/lib/image";
 import { formatDateRange } from "@/lib/format";
 
 type Artwork = {
-  title: string;
+  title?: string;
   year?: number;
   medium?: string[];
   dimensions?: string;
-  status?: string;
   description?: unknown;
-  inventoryNumber?: string;
   images?: Array<{ asset?: unknown; caption?: string }>;
   series?: { title: string; slug: string } | null;
   exhibitions?: Array<{
@@ -32,7 +31,10 @@ type Artwork = {
 
 export async function generateStaticParams() {
   const slugs = await sanityFetch<string[]>(allArtworkSlugsQuery, {}, []);
-  return slugs.map((slug) => ({ slug }));
+  return [
+    ...CATEGORY_IDS.map((slug) => ({ slug })),
+    ...slugs.map((slug) => ({ slug })),
+  ];
 }
 
 export async function generateMetadata({
@@ -41,26 +43,44 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const cat = getCategoryMeta(slug);
+  if (cat) return { title: cat.title };
   const data = await sanityFetch<Artwork | null>(artworkBySlugQuery, { slug }, null);
   if (!data) return {};
   const cover = data.images?.[0] ? urlForImage(data.images[0]).width(1200).height(630).url() : undefined;
   return {
-    title: data.title,
+    title: data.title || "Œuvre",
     description: data.medium?.join(", "),
     openGraph: cover ? { images: [{ url: cover, width: 1200, height: 630 }] } : undefined,
   };
 }
 
-const STATUS_LABEL: Record<string, string> = {
-  disponible: "Disponible",
-  "collection-privee": "Collection privée",
-  "non-disponible": "Non disponible",
-};
-
 export default async function ArtworkPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+
+  const cat = getCategoryMeta(slug);
+  if (cat) {
+    return (
+      <div className="container-page py-16 md:py-20">
+        <nav className="text-sm text-[color:var(--color-ink-muted)]">
+          <Link href="/oeuvres" className="hover:text-[color:var(--color-ink)]">
+            ← Toutes les œuvres
+          </Link>
+        </nav>
+        <header className="mt-6">
+          <h1 className="heading-display text-3xl md:text-5xl">{cat.title}</h1>
+        </header>
+        <div className="mt-12">
+          <SeriesIndex categoryId={cat.id} showTitles={false} />
+        </div>
+      </div>
+    );
+  }
+
   const a = await sanityFetch<Artwork | null>(artworkBySlugQuery, { slug }, null);
   if (!a) notFound();
+
+  const displayTitle = a.title?.trim() || "Sans titre";
 
   return (
     <article className="container-page py-12 md:py-16">
@@ -71,78 +91,38 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
       </nav>
 
       <div className="mt-8 grid gap-12 lg:grid-cols-12">
-        <div className="lg:col-span-8 lg:sticky lg:top-24 lg:self-start">
+        <div className="lg:col-span-7 lg:sticky lg:top-24 lg:self-start">
           {a.images?.[0] && (
             <SanityImage
               source={a.images[0] as never}
-              alt={a.title}
+              alt={displayTitle}
               priority
-              sizes="(min-width: 1024px) 66vw, 100vw"
+              sizes="(min-width: 1024px) 58vw, 100vw"
             />
           )}
           {a.images && a.images.length > 1 && (
             <div className="mt-6 grid grid-cols-2 gap-4">
               {a.images.slice(1).map((img, i) => (
-                <SanityImage key={i} source={img as never} alt={`${a.title} — vue ${i + 2}`} />
+                <SanityImage key={i} source={img as never} alt={`${displayTitle} — vue ${i + 2}`} />
               ))}
             </div>
           )}
         </div>
 
-        <aside className="lg:col-span-4">
-          <p className="eyebrow">{a.series?.title ?? "Œuvre"}</p>
-          <h1 className="heading-display mt-3 text-4xl md:text-5xl italic">{a.title}</h1>
-          <dl className="mt-8 space-y-3 text-sm">
-            {a.year && (
-              <div className="flex justify-between border-b border-[color:var(--color-rule)] pb-2">
-                <dt className="text-[color:var(--color-ink-muted)]">Année</dt>
-                <dd>{a.year}</dd>
-              </div>
-            )}
-            {a.medium && a.medium.length > 0 && (
-              <div className="flex justify-between border-b border-[color:var(--color-rule)] pb-2">
-                <dt className="text-[color:var(--color-ink-muted)]">Médium</dt>
-                <dd className="text-right">{a.medium.join(", ")}</dd>
-              </div>
-            )}
-            {a.dimensions && (
-              <div className="flex justify-between border-b border-[color:var(--color-rule)] pb-2">
-                <dt className="text-[color:var(--color-ink-muted)]">Dimensions</dt>
-                <dd>{a.dimensions}</dd>
-              </div>
-            )}
-            {a.status && (
-              <div className="flex justify-between border-b border-[color:var(--color-rule)] pb-2">
-                <dt className="text-[color:var(--color-ink-muted)]">Statut</dt>
-                <dd>{STATUS_LABEL[a.status] ?? a.status}</dd>
-              </div>
-            )}
-            {a.inventoryNumber && (
-              <div className="flex justify-between border-b border-[color:var(--color-rule)] pb-2">
-                <dt className="text-[color:var(--color-ink-muted)]">N° d&rsquo;inventaire</dt>
-                <dd>{a.inventoryNumber}</dd>
-              </div>
-            )}
-          </dl>
+        <aside className="lg:col-span-5">
+          {a.series?.title && <p className="eyebrow">{a.series.title}</p>}
+          <h1 className="heading-display mt-3 text-3xl md:text-4xl italic">{displayTitle}</h1>
+          {(a.year || (a.medium && a.medium.length > 0) || a.dimensions) && (
+            <p className="mt-4 text-sm text-[color:var(--color-ink-muted)]">
+              {[a.year, a.medium?.join(", "), a.dimensions].filter(Boolean).join(" · ")}
+            </p>
+          )}
 
           {Boolean(a.description) && (
             <div className="mt-8">
               <PortableText value={a.description} />
             </div>
           )}
-
-          <div className="mt-8 border border-[color:var(--color-rule)] p-5">
-            <p className="eyebrow">Acquisition / renseignements</p>
-            <p className="mt-2 text-sm">
-              Cette œuvre est représentée par Bernadette, agente de l&rsquo;artiste.
-            </p>
-            <Link
-              href="/contact"
-              className="mt-4 inline-block border border-[color:var(--color-ink)] px-4 py-2 text-sm hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)]"
-            >
-              Nous contacter
-            </Link>
-          </div>
 
           {a.exhibitions && a.exhibitions.length > 0 && (
             <section className="mt-10">
@@ -162,9 +142,9 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
       </div>
 
       {a.related && a.related.length > 0 && (
-        <section className="mt-28">
-          <h2 className="heading-display text-2xl">Dans la même série</h2>
-          <div className="mt-8 grid gap-x-6 gap-y-12 sm:grid-cols-2 md:grid-cols-4">
+        <section className="mt-20">
+          <h2 className="heading-display text-xl">Dans la même série</h2>
+          <div className="mt-6 grid gap-x-4 gap-y-8 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
             {a.related.map((r) => (
               <ArtworkCard
                 key={r._id}

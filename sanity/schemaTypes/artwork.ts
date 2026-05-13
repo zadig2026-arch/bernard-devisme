@@ -5,18 +5,41 @@ export const artwork = defineType({
   title: "Œuvre",
   type: "document",
   fields: [
-    defineField({ name: "title", title: "Titre", type: "string", validation: (r) => r.required() }),
+    defineField({
+      name: "images",
+      title: "Image(s)",
+      type: "array",
+      of: [
+        {
+          type: "image",
+          options: { hotspot: true },
+          fields: [{ name: "caption", title: "Légende", type: "string" }],
+        },
+      ],
+      validation: (r) => r.min(1).error("Au moins une image est requise."),
+    }),
+    defineField({
+      name: "title",
+      title: "Titre (optionnel)",
+      type: "string",
+    }),
     defineField({
       name: "slug",
       title: "URL",
       type: "slug",
-      options: { source: "title", maxLength: 96 },
+      options: {
+        source: (doc) => {
+          const title = (doc as { title?: string }).title;
+          return title?.trim() || `oeuvre-${Date.now().toString(36)}`;
+        },
+        maxLength: 96,
+      },
       validation: (r) => r.required(),
     }),
-    defineField({ name: "year", title: "Année", type: "number" }),
+    defineField({ name: "year", title: "Année (optionnel)", type: "number" }),
     defineField({
       name: "medium",
-      title: "Médium",
+      title: "Médium (optionnel)",
       type: "array",
       of: [{ type: "string" }],
       options: {
@@ -33,46 +56,36 @@ export const artwork = defineType({
         ],
       },
     }),
-    defineField({ name: "dimensions", title: "Dimensions", type: "string", description: "ex. 80 × 100 cm" }),
+    defineField({
+      name: "dimensions",
+      title: "Dimensions (optionnel)",
+      type: "string",
+      description: "ex. 80 × 100 cm",
+    }),
     defineField({
       name: "series",
-      title: "Série",
+      title: "Série (optionnel)",
       type: "reference",
       to: [{ type: "series" }],
     }),
     defineField({
-      name: "images",
-      title: "Images",
+      name: "description",
+      title: "Description (optionnel)",
       type: "array",
-      of: [
-        {
-          type: "image",
-          options: { hotspot: true },
-          fields: [{ name: "caption", title: "Légende", type: "string" }],
-        },
-      ],
-      validation: (r) => r.min(1),
+      of: [{ type: "block" }],
     }),
     defineField({
-      name: "status",
-      title: "Statut",
-      type: "string",
-      options: {
-        list: [
-          { title: "Disponible", value: "disponible" },
-          { title: "Collection privée", value: "collection-privee" },
-          { title: "Non disponible", value: "non-disponible" },
-        ],
-        layout: "radio",
-      },
-      initialValue: "non-disponible",
+      name: "featured",
+      title: "Afficher sur la page d'accueil",
+      type: "boolean",
+      initialValue: false,
     }),
-    defineField({ name: "description", title: "Description", type: "array", of: [{ type: "block" }] }),
-    defineField({ name: "inventoryNumber", title: "N° d'inventaire", type: "string" }),
-    defineField({ name: "featured", title: "Mettre en avant", type: "boolean", initialValue: false }),
   ],
   preview: {
     select: { title: "title", subtitle: "year", media: "images.0" },
+    prepare({ title, subtitle, media }) {
+      return { title: title || "Sans titre", subtitle: subtitle?.toString(), media };
+    },
   },
   orderings: [
     { title: "Année (récent)", name: "yearDesc", by: [{ field: "year", direction: "desc" }] },

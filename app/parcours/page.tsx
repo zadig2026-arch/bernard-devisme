@@ -5,7 +5,7 @@ export default function ParcoursPage() {
     <div className="container-page py-16 md:py-20">
       <header className="max-w-3xl">
         <p className="eyebrow">Parcours</p>
-        <h1 className="heading-display mt-3 text-4xl md:text-6xl">Bernard Devisme</h1>
+        <h1 className="heading-display mt-3 text-3xl md:text-5xl">Bernard Devisme</h1>
         <p className="mt-6 prose-art text-[color:var(--color-ink-muted)]">
           Né en 1947. Diplômé des Beaux-Arts de Paris en 1970 (mention très bien), après quatre années
           dans les ateliers d&rsquo;Étienne Martin, Robert Couturier, César et Collamarini.

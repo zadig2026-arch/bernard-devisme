@@ -22,7 +22,7 @@ export default async function SeriesIndex() {
 
   return (
     <div className="container-page py-16 md:py-20">
-      <h1 className="heading-display text-4xl md:text-6xl">Séries</h1>
+      <h1 className="heading-display text-3xl md:text-5xl">Séries</h1>
       <p className="mt-4 max-w-2xl text-[color:var(--color-ink-muted)]">
         L&rsquo;œuvre se déploie en cycles thématiques : la condition humaine, la <em>Divine Comédie</em>,
         l&rsquo;objet trivial revisité, la mémoire et la trace.
@@ -33,7 +33,7 @@ export default async function SeriesIndex() {
           <EmptyState title="Aucune série publiée" />
         </div>
       ) : (
-        <div className="hairline mt-12 grid gap-x-8 gap-y-16 pt-10 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-x-5 gap-y-10 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {series.map((s) => (
             <Link key={s._id} href={`/series/${s.slug}`} className="group block">
               {Boolean(s.coverArtwork?.images?.[0]) && (

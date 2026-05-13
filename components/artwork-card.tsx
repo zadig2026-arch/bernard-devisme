@@ -4,7 +4,7 @@ import { urlForImage } from "@/sanity/lib/image";
 
 type Props = {
   slug?: string;
-  title: string;
+  title?: string;
   year?: number;
   medium?: string[];
   dimensions?: string;

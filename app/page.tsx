@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArtworkCard } from "@/components/artwork-card";
 import { EmptyState } from "@/components/empty-state";
-import { PortableText } from "@/components/portable-text";
+import { SeriesIndex } from "@/components/series-index";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { homeQuery } from "@/sanity/lib/queries";
 import { formatDate } from "@/lib/format";
@@ -43,16 +43,43 @@ export default async function HomePage() {
   return (
     <div className="container-page py-16 md:py-24">
       <section className="grid gap-10 md:grid-cols-12">
-        <div className="md:col-span-7">
+        <div className="md:col-span-8">
           <p className="eyebrow">Atelier — Nieul-les-Saintes</p>
-          <h1 className="heading-display mt-4 text-5xl md:text-7xl">Bernard&nbsp;Devisme</h1>
-          <p className="mt-6 prose-art text-[color:var(--color-ink-muted)]">
-            Peintre, sculpteur, infographiste. Diplômé des Beaux-Arts de Paris en 1970, élève
-            d&rsquo;Étienne Martin, Robert Couturier, César et Collamarini. Une œuvre traversant le
-            figuratif, l&rsquo;hyperréalisme et l&rsquo;abstrait, autour de la condition humaine et de
-            la <em>Divine Comédie</em> de Dante.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-4 text-sm">
+          <h1 className="heading-display mt-4 text-3xl md:text-5xl">Bernard&nbsp;Devisme</h1>
+          <div className="mt-8 prose-art text-[color:var(--color-ink-muted)] space-y-4">
+            <p>
+              Peintre, sculpteur et infographiste, né en 1947, diplômé des Beaux-Arts de Paris en 1970
+              (mention très bien) après avoir passé 4 années dans les ateliers
+              d&rsquo;Étienne Martin, Robert Couturier, César et Collamarini.
+            </p>
+            <p>
+              Professeur d&rsquo;Arts Plastiques et d&rsquo;Infographie à l&rsquo;École Alsacienne à
+              Paris pendant 35 ans. Je m&rsquo;installe en Vendée en 2007 puis en Charente-Maritime en 2016.
+            </p>
+            <p>
+              Expositions et installations in situ, collectives et personnelles, en France et à
+              l&rsquo;étranger, dès les années 70.
+            </p>
+            <p>
+              Co-directeur de la galerie «&nbsp;Art Libre&nbsp;» de 1988 à 1990 à Rambouillet (78),
+              puis directeur de l&rsquo;espace d&rsquo;art contemporain «&nbsp;Confluences&nbsp;»
+              jusqu&rsquo;en 1992.
+            </p>
+            <p>
+              Dessins de presse dans <em>L&rsquo;Écho Républicain</em> (Chartres, 1984–1991) puis dans{" "}
+              <em>Ouest-France</em> (Fontenay-le-Comte, 2008–2017).
+            </p>
+            <p>
+              Différentes personnes (françaises ou étrangères), artistes, écrivains, critiques
+              d&rsquo;art, responsables d&rsquo;institutions culturelles ont défendu mon travail.
+              Retrouvez leurs écrits dans la rubrique{" "}
+              <Link href="/regards" className="underline underline-offset-4 hover:text-[color:var(--color-ink)]">
+                Regards d&rsquo;après…
+              </Link>
+            </p>
+          </div>
+
+          <div className="mt-10 flex flex-wrap gap-4 text-sm">
             <Link
               href="/oeuvres"
               className="border border-[color:var(--color-ink)] px-5 py-2.5 hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)] transition-colors"
@@ -63,9 +90,40 @@ export default async function HomePage() {
               Parcours
             </Link>
           </div>
+
+          <address className="mt-10 not-italic text-sm text-[color:var(--color-ink-muted)] space-y-1">
+            <p>Atelier · 17810 Nieul-les-Saintes · 06 30 33 32 71</p>
+            <p>
+              <a href="mailto:bernarddevisme@orange.fr" className="hover:text-[color:var(--color-ink)]">
+                bernarddevisme@orange.fr
+              </a>
+            </p>
+            <p>
+              Blogs :{" "}
+              <a
+                href="https://devismebernard.blogspot.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-[color:var(--color-ink)]"
+              >
+                devismebernard.blogspot.com
+              </a>
+              {" · "}
+              <a
+                href="https://crok-est-charlie.blogspot.com"
+                target="_blank"
+                rel="noreferrer"
+                className="underline underline-offset-4 hover:text-[color:var(--color-ink)]"
+              >
+                crok-est-charlie.blogspot.com
+              </a>{" "}
+              <span className="text-xs">(dessins de presse)</span>
+            </p>
+          </address>
         </div>
+
         {featured[0] && (
-          <div className="md:col-span-5">
+          <div className="md:col-span-4 md:sticky md:top-24 md:self-start">
             <ArtworkCard
               slug={featured[0].slug}
               title={featured[0].title}
@@ -79,54 +137,14 @@ export default async function HomePage() {
         )}
       </section>
 
-      {series.length > 0 && (
-        <section className="mt-28">
-          <header className="flex items-baseline justify-between">
-            <h2 className="heading-display text-3xl md:text-4xl">Séries</h2>
-            <Link href="/series" className="text-sm underline-offset-4 hover:underline">
-              Toutes les séries →
-            </Link>
-          </header>
-          <div className="hairline mt-6 grid gap-12 pt-10 md:grid-cols-3">
-            {series.map((s) => (
-              <Link key={s._id} href={`/series/${s.slug}`} className="group">
-                {Boolean(s.coverArtwork?.images?.[0]) && (
-                  <ArtworkCard slug="" title="" image={s.coverArtwork!.images![0] as never} />
-                )}
-                <p className="eyebrow mt-3">{s.period}</p>
-                <p className="heading-display mt-1 text-2xl italic">{s.title}</p>
-                <div className="mt-2 max-w-prose text-sm text-[color:var(--color-ink-muted)] line-clamp-3">
-                  <PortableText value={s.statement} />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {featured.length > 1 && (
-        <section className="mt-28">
-          <header className="flex items-baseline justify-between">
-            <h2 className="heading-display text-3xl md:text-4xl">Œuvres choisies</h2>
-            <Link href="/oeuvres" className="text-sm underline-offset-4 hover:underline">
-              Catalogue complet →
-            </Link>
-          </header>
-          <div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {featured.slice(1).map((a) => (
-              <ArtworkCard
-                key={a._id}
-                slug={a.slug}
-                title={a.title}
-                year={a.year}
-                medium={a.medium}
-                dimensions={a.dimensions}
-                image={a.images?.[0] as never}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      <section className="mt-20">
+        <header className="flex items-baseline justify-between">
+          <h2 className="heading-display text-2xl md:text-3xl">Œuvres</h2>
+        </header>
+        <div className="mt-8">
+          <SeriesIndex />
+        </div>
+      </section>
 
       {journal.length > 0 && (
         <section className="mt-28">
