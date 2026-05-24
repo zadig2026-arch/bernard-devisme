@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       { source: "/pages/regards-d-apres/:path*", destination: "/regards", permanent: true },
       { source: "/pages/agent/:path*", destination: "/agent", permanent: true },
       { source: "/livredor", destination: "/contact", permanent: true },
+      { source: "/series", destination: "/oeuvres", permanent: true },
     ];
   },
 };

@@ -1,9 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArtworkCard } from "@/components/artwork-card";
 import { PortableText } from "@/components/portable-text";
+import { SeriesGallery, type GalleryItem } from "@/components/series-gallery";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { seriesBySlugQuery, allSeriesSlugsQuery } from "@/sanity/lib/queries";
+import { urlForImage } from "@/sanity/lib/image";
 
 type Series = {
   title: string;
@@ -36,11 +37,21 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
   const s = await sanityFetch<Series | null>(seriesBySlugQuery, { slug }, null);
   if (!s) notFound();
 
+  const items: GalleryItem[] = (s.artworks ?? [])
+    .filter((a) => a.images?.[0])
+    .map((a) => ({
+      _id: a._id,
+      title: a.title?.trim() || undefined,
+      year: a.year,
+      thumb: urlForImage(a.images![0] as never).width(700).height(700).fit("max").url(),
+      full: urlForImage(a.images![0] as never).width(2000).url(),
+    }));
+
   return (
     <div className="container-page py-16 md:py-20">
       <nav className="text-sm text-[color:var(--color-ink-muted)]">
-        <Link href="/series" className="hover:text-[color:var(--color-ink)]">
-          ← Toutes les séries
+        <Link href="/oeuvres" className="hover:text-[color:var(--color-ink)]">
+          ← Toutes les œuvres
         </Link>
       </nav>
 
@@ -54,17 +65,14 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
         </div>
       </header>
 
-      <div className="mt-10 grid gap-x-4 gap-y-8 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7">
-        {s.artworks?.map((a, i) => (
-          <ArtworkCard
-            key={a._id}
-            slug={a.slug}
-            title={a.title}
-            year={a.year}
-            image={a.images?.[0] as never}
-            priority={i < 4}
-          />
-        ))}
+      <div className="mt-10">
+        {items.length > 0 ? (
+          <SeriesGallery items={items} />
+        ) : (
+          <p className="text-sm text-[color:var(--color-ink-muted)]">
+            Les images de cette série seront bientôt disponibles.
+          </p>
+        )}
       </div>
     </div>
   );

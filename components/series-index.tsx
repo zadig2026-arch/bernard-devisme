@@ -1,26 +1,19 @@
 import Link from "next/link";
-import Image from "next/image";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { groq } from "next-sanity";
-import { urlForImage } from "@/sanity/lib/image";
 
 type SeriesEntry = {
   _id: string;
   title: string;
   slug: string;
   count: number;
-  cover?: { asset?: unknown } | null;
 };
 
-const allSeriesWithCoverQuery = groq`*[_type == "series"]{
+const allSeriesQuery = groq`*[_type == "series"]{
   _id,
   title,
   "slug": slug.current,
-  "count": count(*[_type == "artwork" && references(^._id)]),
-  "cover": coalesce(
-    coverArtwork->images[0],
-    *[_type == "artwork" && references(^._id)][0].images[0]
-  )
+  "count": count(*[_type == "artwork" && references(^._id)])
 }`;
 
 type Category = { id: string; title: string; slugs: string[] };
@@ -99,7 +92,7 @@ const CATEGORIES: Category[] = [
 ];
 
 export async function SeriesIndex({ categoryId, showTitles = true }: { categoryId?: string; showTitles?: boolean } = {}) {
-  const all = await sanityFetch<SeriesEntry[]>(allSeriesWithCoverQuery, {}, []);
+  const all = await sanityFetch<SeriesEntry[]>(allSeriesQuery, {}, []);
   const bySlug = new Map(all.map((s) => [s.slug, s]));
 
   if (all.length === 0) return null;
@@ -107,7 +100,7 @@ export async function SeriesIndex({ categoryId, showTitles = true }: { categoryI
   const cats = categoryId ? CATEGORIES.filter((c) => c.id === categoryId) : CATEGORIES;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-16 md:space-y-20">
       {cats.map((cat) => {
         const items = cat.slugs
           .map((s) => bySlug.get(s))
@@ -145,31 +138,23 @@ function CategoryBlock({ id, title, items, showTitle = true }: { id: string; tit
   return (
     <section id={id} className="scroll-mt-28">
       {showTitle && (
-        <h2 className="eyebrow text-[color:var(--color-accent)] text-sm tracking-[0.2em]">
-          {title}
-        </h2>
+        <div className="flex items-baseline justify-between gap-4 border-b-2 border-[color:var(--color-ink)] pb-2">
+          <h2 className="heading-display text-2xl md:text-3xl text-[color:var(--color-ink)]">
+            {title}
+          </h2>
+          <span className="eyebrow shrink-0">
+            {items.length} série{items.length > 1 ? "s" : ""}
+          </span>
+        </div>
       )}
-      <ul className="mt-4 grid gap-x-3 gap-y-5 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9">
+      <ul className={`${showTitle ? "mt-1" : "border-t border-[color:var(--color-rule)]"}`}>
         {items.map((s) => (
-          <li key={s._id}>
-            <Link href={`/series/${s.slug}`} className="group block">
-              <div className="relative aspect-square overflow-hidden bg-[color:var(--color-rule)]/30">
-                {s.cover && (
-                  <Image
-                    src={urlForImage(s.cover).width(240).height(240).fit("crop").url()}
-                    alt={s.title}
-                    fill
-                    sizes="(min-width: 1280px) 11vw, (min-width: 1024px) 14vw, (min-width: 768px) 20vw, (min-width: 640px) 25vw, 33vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
-                )}
-              </div>
-              <p className="mt-1.5 heading-display italic text-xs leading-tight group-hover:text-[color:var(--color-accent)]">
-                {s.title}
-              </p>
-              <p className="text-[10px] text-[color:var(--color-ink-muted)]">
-                {s.count} œuvre{s.count > 1 ? "s" : ""}
-              </p>
+          <li key={s._id} className="border-b border-[color:var(--color-rule)]">
+            <Link
+              href={`/series/${s.slug}`}
+              className="block py-3 heading-display italic text-lg md:text-xl text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
+            >
+              {s.title}
             </Link>
           </li>
         ))}
