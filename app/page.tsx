@@ -41,12 +41,12 @@ export default async function HomePage() {
   const journal = data.latestJournal ?? [];
 
   return (
-    <div className="container-page py-16 md:py-24">
+    <div className="container-page py-8 md:py-12">
       <section className="grid gap-10 md:grid-cols-12">
         <div className="md:col-span-8">
           <p className="eyebrow">Atelier — Nieul-les-Saintes</p>
-          <h1 className="heading-display mt-4 text-3xl md:text-5xl">Bernard&nbsp;Devisme</h1>
-          <div className="mt-8 prose-art text-[color:var(--color-ink-muted)] space-y-4">
+          <h1 className="heading-display mt-3 text-3xl md:text-4xl">Bernard&nbsp;Devisme</h1>
+          <div className="mt-5 font-serif text-[0.95rem] md:text-base leading-[1.55] text-[color:var(--color-ink-muted)] space-y-3 max-w-[62ch]">
             <p>
               Peintre, sculpteur et infographiste, né en 1947, diplômé des Beaux-Arts de Paris en 1970
               (mention très bien) après avoir passé 4 années dans les ateliers
@@ -79,7 +79,7 @@ export default async function HomePage() {
             </p>
           </div>
 
-          <div className="mt-10 flex flex-wrap gap-4 text-sm">
+          <div className="mt-6 flex flex-wrap gap-4 text-sm">
             <Link
               href="/oeuvres"
               className="border border-[color:var(--color-ink)] px-5 py-2.5 hover:bg-[color:var(--color-ink)] hover:text-[color:var(--color-paper)] transition-colors"
@@ -91,7 +91,7 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          <address className="mt-10 not-italic text-sm text-[color:var(--color-ink-muted)] space-y-1">
+          <address className="mt-5 not-italic text-sm text-[color:var(--color-ink-muted)] space-y-1">
             <p>Atelier · 17810 Nieul-les-Saintes · 06 30 33 32 71</p>
             <p>
               <a href="mailto:bernarddevisme@orange.fr" className="hover:text-[color:var(--color-ink)]">
