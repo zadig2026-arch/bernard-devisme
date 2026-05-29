@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { AudioPlayer } from "@/components/audio-player";
+import { SaleBadge } from "@/components/sale-badge";
 
 export type GalleryItem = {
   _id: string;
@@ -11,6 +12,8 @@ export type GalleryItem = {
   thumb: string;
   full: string;
   audioUrl?: string;
+  dimensions?: string;
+  saleStatus?: "available" | "sold";
 };
 
 export function SeriesGallery({ items }: { items: GalleryItem[] }) {
@@ -136,10 +139,15 @@ export function SeriesGallery({ items }: { items: GalleryItem[] }) {
                 priority
               />
             </div>
-            {(current.title || current.year) && (
+            {(current.title || current.year || current.dimensions) && (
               <figcaption className="mt-3 text-center text-sm text-white/80">
-                {[current.title, current.year].filter(Boolean).join(" · ")}
+                {[current.title, current.year, current.dimensions].filter(Boolean).join(" · ")}
               </figcaption>
+            )}
+            {current.saleStatus && (
+              <div className="mt-2">
+                <SaleBadge status={current.saleStatus} variant="dark" />
+              </div>
             )}
             {current.audioUrl && (
               <AudioPlayer key={current._id} src={current.audioUrl} variant="dark" autoPlay />

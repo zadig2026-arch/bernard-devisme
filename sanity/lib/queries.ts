@@ -40,7 +40,7 @@ export const allSeriesQuery = groq`*[_type == "series"]|order(period desc){
 export const seriesBySlugQuery = groq`*[_type == "series" && slug.current == $slug][0]{
   _id, title, period, statement,
   "artworks": *[_type == "artwork" && references(^._id)]|order(year desc){
-    _id, title, "slug": slug.current, year, medium, dimensions, images,
+    _id, title, "slug": slug.current, year, medium, dimensions, saleStatus, images,
     "audioUrl": audio.asset->url
   }
 }`;
