@@ -20,6 +20,14 @@ export const siteSettings = defineType({
       ],
     }),
     defineField({
+      name: "visitCount",
+      title: "Compteur de visites",
+      type: "number",
+      description: "Incrémenté automatiquement. Modifiez la valeur de départ si besoin.",
+      initialValue: 0,
+      readOnly: true,
+    }),
+    defineField({
       name: "socialLinks",
       title: "Liens externes",
       type: "array",

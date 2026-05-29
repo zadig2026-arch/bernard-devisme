@@ -58,9 +58,31 @@ export const artwork = defineType({
     }),
     defineField({
       name: "dimensions",
-      title: "Dimensions (optionnel)",
+      title: "Format / dimensions (optionnel)",
       type: "string",
-      description: "ex. 80 × 100 cm",
+      description: "ex. 80 × 100 cm, ou 25 F, format paysage…",
+    }),
+    defineField({
+      name: "saleStatus",
+      title: "Disponibilité (optionnel)",
+      type: "string",
+      description:
+        "Laisser vide pour ne rien afficher. Sinon, indiquer si l'œuvre est à vendre ou déjà vendue.",
+      options: {
+        list: [
+          { title: "À vendre", value: "available" },
+          { title: "Vendue", value: "sold" },
+        ],
+        layout: "radio",
+      },
+    }),
+    defineField({
+      name: "audio",
+      title: "Musique d'ambiance (optionnel)",
+      type: "file",
+      description:
+        "Pour les œuvres animées : une courte boucle sonore que le visiteur pourra écouter en cliquant sur un bouton. Formats conseillés : MP3.",
+      options: { accept: "audio/*" },
     }),
     defineField({
       name: "series",

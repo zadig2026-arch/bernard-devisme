@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { VisitCounter } from "@/components/visit-counter";
 
 export function SiteFooter() {
   return (
@@ -18,6 +19,7 @@ export function SiteFooter() {
           <p className="heading-display text-base text-[color:var(--color-ink)]">© {new Date().getFullYear()}</p>
           <p className="mt-2">Tous droits réservés.</p>
           <Link href="/mentions-legales" className="underline-offset-4 hover:underline">Mentions légales</Link>
+          <VisitCounter />
         </div>
       </div>
     </footer>

@@ -4,6 +4,8 @@ import type { Metadata } from "next";
 import { SanityImage } from "@/components/sanity-image";
 import { PortableText } from "@/components/portable-text";
 import { ArtworkCard } from "@/components/artwork-card";
+import { AudioPlayer } from "@/components/audio-player";
+import { SaleBadge } from "@/components/sale-badge";
 import { SeriesIndex, getCategoryMeta, CATEGORY_IDS } from "@/components/series-index";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { artworkBySlugQuery, allArtworkSlugsQuery } from "@/sanity/lib/queries";
@@ -17,6 +19,8 @@ type Artwork = {
   dimensions?: string;
   description?: unknown;
   images?: Array<{ asset?: unknown; caption?: string }>;
+  saleStatus?: "available" | "sold";
+  audioUrl?: string;
   series?: { title: string; slug: string } | null;
   exhibitions?: Array<{
     title: string;
@@ -100,6 +104,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
               sizes="(min-width: 1024px) 58vw, 100vw"
             />
           )}
+          {a.audioUrl && <AudioPlayer src={a.audioUrl} />}
           {a.images && a.images.length > 1 && (
             <div className="mt-6 grid grid-cols-2 gap-4">
               {a.images.slice(1).map((img, i) => (
@@ -116,6 +121,11 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
             <p className="mt-4 text-sm text-[color:var(--color-ink-muted)]">
               {[a.year, a.medium?.join(", "), a.dimensions].filter(Boolean).join(" · ")}
             </p>
+          )}
+          {a.saleStatus && (
+            <div className="mt-4">
+              <SaleBadge status={a.saleStatus} />
+            </div>
           )}
 
           {Boolean(a.description) && (

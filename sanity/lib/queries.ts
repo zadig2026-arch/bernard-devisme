@@ -14,13 +14,14 @@ export const homeQuery = groq`{
 }`;
 
 export const allArtworksQuery = groq`*[_type == "artwork"]|order(year desc, _createdAt desc){
-  _id, title, "slug": slug.current, year, medium, dimensions,
+  _id, title, "slug": slug.current, year, medium, dimensions, saleStatus,
   "series": series->{title, "slug": slug.current},
   images
 }`;
 
 export const artworkBySlugQuery = groq`*[_type == "artwork" && slug.current == $slug][0]{
-  _id, title, year, medium, dimensions, description, images,
+  _id, title, year, medium, dimensions, description, images, saleStatus,
+  "audioUrl": audio.asset->url,
   "series": series->{title, "slug": slug.current},
   "exhibitions": *[_type == "exhibition" && references(^._id)]|order(startDate desc){
     title, "slug": slug.current, venue, city, startDate, endDate
