@@ -142,7 +142,7 @@ export function SeriesGallery({ items }: { items: GalleryItem[] }) {
               </figcaption>
             )}
             {current.audioUrl && (
-              <AudioPlayer key={current._id} src={current.audioUrl} variant="dark" />
+              <AudioPlayer key={current._id} src={current.audioUrl} variant="dark" autoPlay />
             )}
           </figure>
         </div>

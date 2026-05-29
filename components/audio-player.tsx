@@ -11,10 +11,12 @@ export function AudioPlayer({
   src,
   label,
   variant = "light",
+  autoPlay = false,
 }: {
   src: string;
   label?: string;
   variant?: "light" | "dark";
+  autoPlay?: boolean;
 }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
@@ -22,13 +24,19 @@ export function AudioPlayer({
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    const onEnded = () => setPlaying(false);
-    audio.addEventListener("pause", onEnded);
+    const onPause = () => setPlaying(false);
+    audio.addEventListener("pause", onPause);
+    // Démarrage automatique : autorisé car déclenché juste après le clic
+    // d'ouverture de l'œuvre. Si le navigateur refuse (ex. iOS), on reste
+    // sur pause et le visiteur peut lancer via le bouton.
+    if (autoPlay) {
+      void audio.play().then(() => setPlaying(true)).catch(() => setPlaying(false));
+    }
     return () => {
-      audio.removeEventListener("pause", onEnded);
+      audio.removeEventListener("pause", onPause);
       audio.pause();
     };
-  }, []);
+  }, [autoPlay]);
 
   function toggle() {
     const audio = audioRef.current;
