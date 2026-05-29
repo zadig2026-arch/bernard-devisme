@@ -7,7 +7,15 @@ import { useEffect, useRef, useState } from "react";
  * visiteur active manuellement (les navigateurs bloquent l'autoplay sonore).
  * La boucle tourne tant qu'elle n'est pas coupée.
  */
-export function AudioPlayer({ src, label }: { src: string; label?: string }) {
+export function AudioPlayer({
+  src,
+  label,
+  variant = "light",
+}: {
+  src: string;
+  label?: string;
+  variant?: "light" | "dark";
+}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -33,6 +41,11 @@ export function AudioPlayer({ src, label }: { src: string; label?: string }) {
     }
   }
 
+  const buttonClass =
+    variant === "dark"
+      ? "inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm text-white transition-colors hover:bg-white hover:text-black"
+      : "inline-flex items-center gap-2 rounded-full border border-[color:var(--color-rule)] px-4 py-2 text-sm text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-white";
+
   return (
     <div className="mt-4 flex items-center gap-3">
       <button
@@ -40,7 +53,7 @@ export function AudioPlayer({ src, label }: { src: string; label?: string }) {
         onClick={toggle}
         aria-pressed={playing}
         aria-label={playing ? "Couper la musique" : "Écouter la musique"}
-        className="inline-flex items-center gap-2 rounded-full border border-[color:var(--color-rule)] px-4 py-2 text-sm text-[color:var(--color-ink)] transition-colors hover:bg-[color:var(--color-ink)] hover:text-white"
+        className={buttonClass}
       >
         <span aria-hidden className="text-base leading-none">
           {playing ? "❚❚" : "▶"}

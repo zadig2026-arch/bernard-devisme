@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { AudioPlayer } from "@/components/audio-player";
 
 export type GalleryItem = {
   _id: string;
@@ -9,6 +10,7 @@ export type GalleryItem = {
   year?: number;
   thumb: string;
   full: string;
+  audioUrl?: string;
 };
 
 export function SeriesGallery({ items }: { items: GalleryItem[] }) {
@@ -138,6 +140,9 @@ export function SeriesGallery({ items }: { items: GalleryItem[] }) {
               <figcaption className="mt-3 text-center text-sm text-white/80">
                 {[current.title, current.year].filter(Boolean).join(" · ")}
               </figcaption>
+            )}
+            {current.audioUrl && (
+              <AudioPlayer key={current._id} src={current.audioUrl} variant="dark" />
             )}
           </figure>
         </div>

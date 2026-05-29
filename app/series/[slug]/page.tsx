@@ -18,6 +18,7 @@ type Series = {
     medium?: string[];
     dimensions?: string;
     images?: Array<unknown>;
+    audioUrl?: string;
   }>;
 };
 
@@ -45,6 +46,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
       year: a.year,
       thumb: urlForImage(a.images![0] as never).width(700).height(700).fit("max").url(),
       full: urlForImage(a.images![0] as never).width(2000).url(),
+      audioUrl: a.audioUrl,
     }));
 
   return (
