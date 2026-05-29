@@ -104,7 +104,6 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
               sizes="(min-width: 1024px) 58vw, 100vw"
             />
           )}
-          {a.audioUrl && <AudioPlayer src={a.audioUrl} />}
           {a.images && a.images.length > 1 && (
             <div className="mt-6 grid grid-cols-2 gap-4">
               {a.images.slice(1).map((img, i) => (
@@ -127,6 +126,8 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
               <SaleBadge status={a.saleStatus} />
             </div>
           )}
+
+          {a.audioUrl && <AudioPlayer src={a.audioUrl} />}
 
           {Boolean(a.description) && (
             <div className="mt-8">
