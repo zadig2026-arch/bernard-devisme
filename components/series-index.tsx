@@ -152,7 +152,7 @@ function CategoryBlock({ id, title, items, showTitle = true }: { id: string; tit
           <li key={s._id} className="border-b border-[color:var(--color-rule)]">
             <Link
               href={`/series/${s.slug}`}
-              className="block py-3 heading-display italic text-lg md:text-xl text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
+              className="block py-2 heading-display italic text-base md:text-lg text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
             >
               {s.title}
             </Link>
