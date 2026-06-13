@@ -25,14 +25,14 @@ const client = createClient({
   useCdn: false,
 });
 
-const MP3 = resolve(process.cwd(), "data/audio-mp3-2026-06-12/XTRA110_HOUSE_____3s.mp3");
+const MP3 = resolve(process.cwd(), "data/audio-src-2026-06-12/moore-lookmebody.mp3");
 const MP4 = resolve(process.cwd(), "data/videos/les-animations-danseurs.mp4");
 for (const p of [MP3, MP4]) {
   if (!existsSync(p)) { console.error(`✗ fichier manquant : ${p}`); process.exit(1); }
 }
 
 const audio = await client.assets.upload("file", createReadStream(MP3), {
-  filename: "XTRA110_HOUSE.mp3",
+  filename: "moore-lookmebody.mp3",
   contentType: "audio/mpeg",
 });
 console.log("audio", audio._id);
