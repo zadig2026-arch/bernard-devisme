@@ -20,6 +20,7 @@ type Series = {
     saleStatus?: "available" | "sold";
     images?: Array<unknown>;
     audioUrl?: string;
+    videoUrl?: string;
   }>;
 };
 
@@ -48,6 +49,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
       thumb: urlForImage(a.images![0] as never).width(700).height(700).fit("max").url(),
       full: urlForImage(a.images![0] as never).width(2000).url(),
       audioUrl: a.audioUrl,
+      videoUrl: a.videoUrl,
       dimensions: a.dimensions,
       saleStatus: a.saleStatus,
     }));

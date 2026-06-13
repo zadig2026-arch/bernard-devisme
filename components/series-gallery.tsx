@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
+import { AnimationVideo } from "@/components/animation-video";
 import { AudioPlayer } from "@/components/audio-player";
 import { SaleBadge } from "@/components/sale-badge";
 
@@ -12,6 +13,7 @@ export type GalleryItem = {
   thumb: string;
   full: string;
   audioUrl?: string;
+  videoUrl?: string;
   dimensions?: string;
   saleStatus?: "available" | "sold";
 };
@@ -129,16 +131,25 @@ export function SeriesGallery({ items }: { items: GalleryItem[] }) {
             className="flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative h-[82vh] w-[86vw]">
-              <Image
-                src={current.full}
-                alt={current.title || ""}
-                fill
-                sizes="86vw"
-                className="object-contain"
-                priority
+            {current.videoUrl ? (
+              <AnimationVideo
+                key={current._id}
+                src={current.videoUrl}
+                variant="dark"
+                className="h-[78vh] w-[86vw]"
               />
-            </div>
+            ) : (
+              <div className="relative h-[82vh] w-[86vw]">
+                <Image
+                  src={current.full}
+                  alt={current.title || ""}
+                  fill
+                  sizes="86vw"
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            )}
             {(current.title || current.year || current.dimensions) && (
               <figcaption className="mt-3 text-center text-sm text-white/80">
                 {[current.title, current.year, current.dimensions].filter(Boolean).join(" · ")}
@@ -149,7 +160,7 @@ export function SeriesGallery({ items }: { items: GalleryItem[] }) {
                 <SaleBadge status={current.saleStatus} variant="dark" />
               </div>
             )}
-            {current.audioUrl && (
+            {!current.videoUrl && current.audioUrl && (
               <AudioPlayer key={current._id} src={current.audioUrl} variant="dark" autoPlay />
             )}
           </figure>

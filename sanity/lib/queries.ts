@@ -22,6 +22,7 @@ export const allArtworksQuery = groq`*[_type == "artwork"]|order(year desc, _cre
 export const artworkBySlugQuery = groq`*[_type == "artwork" && slug.current == $slug][0]{
   _id, title, year, medium, dimensions, description, images, saleStatus,
   "audioUrl": audio.asset->url,
+  "videoUrl": video.asset->url,
   "series": series->{title, "slug": slug.current},
   "exhibitions": *[_type == "exhibition" && references(^._id)]|order(startDate desc){
     title, "slug": slug.current, venue, city, startDate, endDate
@@ -41,7 +42,8 @@ export const seriesBySlugQuery = groq`*[_type == "series" && slug.current == $sl
   _id, title, period, statement,
   "artworks": *[_type == "artwork" && references(^._id)]|order(year desc){
     _id, title, "slug": slug.current, year, medium, dimensions, saleStatus, images,
-    "audioUrl": audio.asset->url
+    "audioUrl": audio.asset->url,
+    "videoUrl": video.asset->url
   }
 }`;
 

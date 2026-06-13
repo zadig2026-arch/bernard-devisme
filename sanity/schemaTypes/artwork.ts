@@ -85,6 +85,14 @@ export const artwork = defineType({
       options: { accept: "audio/*" },
     }),
     defineField({
+      name: "video",
+      title: "Animation sonorisée (optionnel)",
+      type: "file",
+      description:
+        "Pour les œuvres animées : la vidéo MP4 où l'animation et sa musique sont déjà assemblées et synchronisées. Si elle est renseignée, la visionneuse joue cette vidéo à la place de l'image et de la musique séparées. Générée par scripts/build-site-videos.mjs.",
+      options: { accept: "video/mp4" },
+    }),
+    defineField({
       name: "series",
       title: "Série (optionnel)",
       type: "reference",

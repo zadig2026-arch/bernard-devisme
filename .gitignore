@@ -47,6 +47,12 @@ data/images/
 # audio working files (WAV sources + MP3 renders) — large binaries, live in Sanity
 data/audio-src/
 data/audio-mp3/
+data/audio-src-2026-06-12/
+data/audio-mp3-2026-06-12/
+
+# animation working files (GIFs from Sanity CDN + synced MP4 renders) — live in Sanity
+data/gifs-live/
+data/videos/
 
 # firecrawl scratch
 .firecrawl/

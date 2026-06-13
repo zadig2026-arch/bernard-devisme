@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { SanityImage } from "@/components/sanity-image";
 import { PortableText } from "@/components/portable-text";
+import { AnimationVideo } from "@/components/animation-video";
 import { ArtworkCard } from "@/components/artwork-card";
 import { AudioPlayer } from "@/components/audio-player";
 import { SaleBadge } from "@/components/sale-badge";
@@ -21,6 +22,7 @@ type Artwork = {
   images?: Array<{ asset?: unknown; caption?: string }>;
   saleStatus?: "available" | "sold";
   audioUrl?: string;
+  videoUrl?: string;
   series?: { title: string; slug: string } | null;
   exhibitions?: Array<{
     title: string;
@@ -96,13 +98,17 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
 
       <div className="mt-8 grid gap-12 lg:grid-cols-12">
         <div className="lg:col-span-7 lg:sticky lg:top-24 lg:self-start">
-          {a.images?.[0] && (
-            <SanityImage
-              source={a.images[0] as never}
-              alt={displayTitle}
-              priority
-              sizes="(min-width: 1024px) 58vw, 100vw"
-            />
+          {a.videoUrl ? (
+            <AnimationVideo src={a.videoUrl} className="w-full" />
+          ) : (
+            a.images?.[0] && (
+              <SanityImage
+                source={a.images[0] as never}
+                alt={displayTitle}
+                priority
+                sizes="(min-width: 1024px) 58vw, 100vw"
+              />
+            )
           )}
           {a.images && a.images.length > 1 && (
             <div className="mt-6 grid grid-cols-2 gap-4">
@@ -127,7 +133,7 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
             </div>
           )}
 
-          {a.audioUrl && <AudioPlayer src={a.audioUrl} />}
+          {a.audioUrl && !a.videoUrl && <AudioPlayer src={a.audioUrl} />}
 
           {Boolean(a.description) && (
             <div className="mt-8">
