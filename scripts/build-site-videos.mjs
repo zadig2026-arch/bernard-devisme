@@ -42,6 +42,7 @@ const PAIRS = [
   { slug: "les-animations-la-frite",                gif: "la-frite.gif",             wav: "go west_93_04___orgue bongo.WAV" },
   { slug: "les-animations-animation-piano-drums1",  gif: "piano-drums1.gif",         wav: "PIANO018___________13s métalic.WAV" },
   { slug: "les-animations-piano-seul",              gif: "piano-seul.gif",           wav: "PIANO077______________10s.WAV" },
+  { slug: "les-animations-danseurs",                gif: "danseurs.gif",             wav: "SOUL.WAV" },
 ];
 
 const MIN_DUR = 10;   // durée mini visée de la vidéo (s)
