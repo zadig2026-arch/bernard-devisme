@@ -6,7 +6,8 @@ import { press } from "./press";
 import { journalEntry } from "./journalEntry";
 import { page } from "./page";
 import { siteSettings } from "./siteSettings";
+import { parcours } from "./parcours";
 
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [artwork, series, exhibition, press, journalEntry, page, siteSettings],
+  types: [artwork, series, exhibition, press, journalEntry, page, siteSettings, parcours],
 };

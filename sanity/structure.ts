@@ -36,4 +36,10 @@ export const structure: StructureResolver = (S) =>
             .documentId("siteSettings")
             .title("Texte d'accueil"),
         ),
+      S.listItem()
+        .title("Parcours et CV")
+        .id("parcours")
+        .child(
+          S.document().schemaType("parcours").documentId("parcours").title("Parcours et CV"),
+        ),
     ]);
