@@ -22,6 +22,17 @@ export function SiteFooter() {
           <VisitCounter />
         </div>
       </div>
+      <p className="mt-10 text-xs text-[color:var(--color-ink-muted)]">
+        Site réalisé par{" "}
+        <a
+          href="https://zadig.pro"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="underline-offset-4 hover:underline hover:text-[color:var(--color-ink)]"
+        >
+          Zadig Becques · zadig.pro
+        </a>
+      </p>
     </footer>
   );
 }
