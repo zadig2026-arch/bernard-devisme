@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter } from "next/font/google";
 import "./globals.css";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { PersonJsonLd } from "./(jsonld)/person";
 
 const fraunces = Fraunces({
   variable: "--font-fraunces",
@@ -42,12 +39,9 @@ export default function RootLayout({
       lang="fr"
       className={`${fraunces.variable} ${inter.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <PersonJsonLd />
-        <SiteHeader />
-        <main className="flex-1">{children}</main>
-        <SiteFooter />
-      </body>
+      {/* Layout racine minimal : le chrome du site vit dans (site)/layout.tsx,
+          pour que /studio s'affiche seul, en plein écran. */}
+      <body className="min-h-full">{children}</body>
     </html>
   );
 }
