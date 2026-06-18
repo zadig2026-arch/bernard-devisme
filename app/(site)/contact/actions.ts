@@ -30,7 +30,7 @@ export async function sendContact(formData: FormData): Promise<Result> {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
     body: JSON.stringify({
-      from: "Site Bernard Devisme <noreply@devismebernardpeintre.com>",
+      from: "Site Bernard Devisme <noreply@zadig.pro>",
       to: [to],
       reply_to: email,
       subject: `[Site] ${subject}`,
