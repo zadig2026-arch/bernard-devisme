@@ -11,7 +11,23 @@ export default defineConfig({
   basePath: "/studio",
   projectId,
   dataset,
-  schema,
+  schema: {
+    ...schema,
+    // Créer une œuvre depuis une rubrique pré-remplit le champ Rubrique
+    // (utilisé par sanity/structure.ts via initialValueTemplates).
+    templates: (prev) => [
+      ...prev,
+      {
+        id: "artwork-in-series",
+        title: "Œuvre dans la rubrique",
+        schemaType: "artwork",
+        parameters: [{ name: "seriesId", title: "Rubrique", type: "string" }],
+        value: ({ seriesId }: { seriesId: string }) => ({
+          series: { _type: "reference", _ref: seriesId },
+        }),
+      },
+    ],
+  },
   // Studio épuré et en français : navigation sur mesure, interface traduite,
   // sans l'outil technique Vision.
   plugins: [structureTool({ structure }), frFRLocale()],
