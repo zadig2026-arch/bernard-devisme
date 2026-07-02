@@ -1,9 +1,12 @@
 import { defineField, defineType } from "sanity";
+import { ArtworkInputWithDelete } from "../components/artwork-input-with-delete";
 
 export const artwork = defineType({
   name: "artwork",
   title: "Œuvre",
   type: "document",
+  // Bouton « Supprimer cette œuvre » visible en bas de la fiche.
+  components: { input: ArtworkInputWithDelete },
   fields: [
     // --- L'essentiel pour Bernard : image, titre, rubrique ---
     defineField({
