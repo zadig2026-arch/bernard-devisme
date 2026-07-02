@@ -86,7 +86,7 @@ export const structure: StructureResolver = (S) =>
         ),
       S.divider(),
       S.documentTypeListItem("artwork").title("Ajouter / modifier une œuvre"),
-      S.documentTypeListItem("series").title("Rubriques (titres et textes)"),
+      S.documentTypeListItem("series").title("Ajouter / modifier une rubrique"),
       S.divider(),
       S.listItem()
         .title("Texte d'accueil")
