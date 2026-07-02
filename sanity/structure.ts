@@ -85,7 +85,7 @@ export const structure: StructureResolver = (S) =>
             .child((seriesId) => artworksOfSeries(S, seriesId)),
         ),
       S.divider(),
-      S.documentTypeListItem("artwork").title("Toutes les œuvres"),
+      S.documentTypeListItem("artwork").title("Ajouter / modifier une œuvre"),
       S.documentTypeListItem("series").title("Rubriques (titres et textes)"),
       S.divider(),
       S.listItem()
