@@ -1,9 +1,14 @@
 /**
- * Mapping catégorie → séries (rubriques), miroir de la structure de
- * l'ancien e-monsite. Source de vérité UNIQUE, partagée entre le site
+ * Les parties du site (catégories), partagées entre le site
  * (components/series-index.tsx) et la navigation du Studio
- * (sanity/structure.ts). Quand une nouvelle série est créée dans Sanity,
- * ajouter son slug à la bonne entrée, sinon elle tombe dans « Autres ».
+ * (sanity/structure.ts).
+ *
+ * L'APPARTENANCE d'une rubrique à une partie vit dans Sanity (champ
+ * `category` du type series, éditable par Bernard). Les listes `slugs`
+ * ci-dessous ne servent plus qu'à préserver l'ORDRE d'affichage historique
+ * de l'ancien e-monsite : les rubriques listées s'affichent dans cet ordre,
+ * les nouvelles (créées par Bernard) s'ajoutent à la suite, par ordre
+ * alphabétique.
  */
 export type Category = { id: string; title: string; slugs: string[] };
 
@@ -79,6 +84,3 @@ export const CATEGORIES: Category[] = [
     slugs: ["livres-objets", "livres-objets-raku", "plus"],
   },
 ];
-
-/** Tous les slugs déjà rangés dans une catégorie. */
-export const ASSIGNED_SLUGS = CATEGORIES.flatMap((c) => c.slugs);

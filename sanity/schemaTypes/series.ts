@@ -7,9 +7,26 @@ export const series = defineType({
   fields: [
     defineField({ name: "title", title: "Titre", type: "string", validation: (r) => r.required() }),
     defineField({
+      name: "category",
+      title: "Partie du site",
+      type: "string",
+      description: "Dans quelle partie du site ranger cette rubrique.",
+      options: {
+        layout: "radio",
+        list: [
+          { title: "Peinture", value: "peinture" },
+          { title: "Sculpture", value: "sculpture" },
+          { title: "Graphisme", value: "graphisme" },
+          { title: "Infographies", value: "infographies" },
+          { title: "Livres-objets et plus", value: "livres-objets" },
+        ],
+      },
+    }),
+    defineField({
       name: "slug",
       title: "URL",
       type: "slug",
+      description: "Cliquez sur « Générer » après avoir écrit le titre.",
       options: { source: "title", maxLength: 96 },
       validation: (r) => r.required(),
     }),

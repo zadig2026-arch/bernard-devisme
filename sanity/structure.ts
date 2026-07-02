@@ -1,5 +1,5 @@
 import type { StructureResolver, StructureBuilder } from "sanity/structure";
-import { CATEGORIES, ASSIGNED_SLUGS, type Category } from "../lib/categories";
+import { CATEGORIES, type Category } from "../lib/categories";
 
 /**
  * Studio volontairement épuré pour Bernard : la navigation reprend la
@@ -24,7 +24,17 @@ const artworksOfSeries = (S: StructureBuilder, seriesId: string) =>
     // les templates personnalisés posés avant.
     .initialValueTemplates([S.initialValueTemplateItem("artwork-in-series", { seriesId })]);
 
-/** Une partie du site (Peinture, Sculpture...) : ses rubriques → leurs œuvres. */
+/**
+ * Une partie du site (Peinture, Sculpture...) : ses rubriques → leurs œuvres.
+ * L'appartenance vient du champ `category` des séries (éditable par Bernard) ;
+ * créer une rubrique ici pré-remplit sa partie du site.
+ *
+ * Le résolveur `child` intercepte AUSSI les documents fraîchement créés par
+ * le « + » du panneau : pour eux, il faut ouvrir le formulaire de la rubrique,
+ * pas la liste (vide) de ses œuvres. On distingue les deux cas en vérifiant
+ * si la rubrique est déjà PUBLIÉE (une rubrique en cours de création n'a
+ * qu'un brouillon, voire rien).
+ */
 const categoryItem = (S: StructureBuilder, cat: Category) =>
   S.listItem()
     .title(cat.title)
@@ -34,10 +44,25 @@ const categoryItem = (S: StructureBuilder, cat: Category) =>
         .title(cat.title)
         .schemaType("series")
         .apiVersion("2024-01-01")
-        .filter('_type == "series" && slug.current in $slugs')
-        .params({ slugs: cat.slugs })
+        .filter('_type == "series" && category == $cat')
+        .params({ cat: cat.id })
         .defaultOrdering([{ field: "title", direction: "asc" }])
-        .child((seriesId) => artworksOfSeries(S, seriesId)),
+        .child(async (seriesId, { structureContext }) => {
+          const client = structureContext.getClient({ apiVersion: "2024-01-01" });
+          const published = await client.fetch<boolean>("count(*[_id == $id]) > 0", {
+            id: seriesId,
+          });
+          return published
+            ? artworksOfSeries(S, seriesId)
+            : S.document()
+                .schemaType("series")
+                .documentId(seriesId)
+                .initialValueTemplate("series-in-category", { categoryId: cat.id });
+        })
+        // ⚠️ DOIT rester le DERNIER appel de la chaîne (voir artworksOfSeries).
+        .initialValueTemplates([
+          S.initialValueTemplateItem("series-in-category", { categoryId: cat.id }),
+        ]),
     );
 
 export const structure: StructureResolver = (S) =>
@@ -54,8 +79,8 @@ export const structure: StructureResolver = (S) =>
             .title("Autres rubriques")
             .schemaType("series")
             .apiVersion("2024-01-01")
-            .filter('_type == "series" && !(slug.current in $slugs)')
-            .params({ slugs: ASSIGNED_SLUGS })
+            .filter('_type == "series" && (!defined(category) || !(category in $cats))')
+            .params({ cats: CATEGORIES.map((c) => c.id) })
             .defaultOrdering([{ field: "title", direction: "asc" }])
             .child((seriesId) => artworksOfSeries(S, seriesId)),
         ),

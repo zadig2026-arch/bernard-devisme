@@ -26,6 +26,15 @@ export default defineConfig({
           series: { _type: "reference", _ref: seriesId },
         }),
       },
+      {
+        id: "series-in-category",
+        title: "Rubrique dans une partie du site",
+        schemaType: "series",
+        parameters: [{ name: "categoryId", title: "Partie du site", type: "string" }],
+        value: ({ categoryId }: { categoryId: string }) => ({
+          category: categoryId,
+        }),
+      },
     ],
   },
   // Studio épuré et en français : navigation sur mesure, interface traduite,

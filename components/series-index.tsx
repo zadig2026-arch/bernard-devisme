@@ -6,6 +6,7 @@ type SeriesEntry = {
   _id: string;
   title: string;
   slug: string;
+  category?: string;
   count: number;
 };
 
@@ -13,6 +14,7 @@ const allSeriesQuery = groq`*[_type == "series"]{
   _id,
   title,
   "slug": slug.current,
+  category,
   "count": count(*[_type == "artwork" && references(^._id)])
 }`;
 
@@ -21,18 +23,31 @@ import { CATEGORIES } from "@/lib/categories";
 
 export async function SeriesIndex({ categoryId, showTitles = true }: { categoryId?: string; showTitles?: boolean } = {}) {
   const all = await sanityFetch<SeriesEntry[]>(allSeriesQuery, {}, []);
-  const bySlug = new Map(all.map((s) => [s.slug, s]));
 
   if (all.length === 0) return null;
 
   const cats = categoryId ? CATEGORIES.filter((c) => c.id === categoryId) : CATEGORIES;
+  const knownIds = new Set(CATEGORIES.map((c) => c.id));
+
+  // L'appartenance vient du champ `category` (Sanity, éditable par Bernard) ;
+  // la liste de slugs historique ne sert plus qu'à préserver l'ordre
+  // d'affichage de l'ancien site, les nouvelles rubriques venant à la suite.
+  const itemsOf = (cat: (typeof CATEGORIES)[number]) => {
+    const legacyOrder = new Map(cat.slugs.map((s, i) => [s, i]));
+    return all
+      .filter((s) => s.category === cat.id && s.count > 0)
+      .sort(
+        (a, b) =>
+          (legacyOrder.get(a.slug) ?? Number.MAX_SAFE_INTEGER) -
+            (legacyOrder.get(b.slug) ?? Number.MAX_SAFE_INTEGER) ||
+          a.title.localeCompare(b.title, "fr"),
+      );
+  };
 
   return (
     <div className="space-y-16 md:space-y-20">
       {cats.map((cat) => {
-        const items = cat.slugs
-          .map((s) => bySlug.get(s))
-          .filter((x): x is SeriesEntry => Boolean(x) && (x as SeriesEntry).count > 0);
+        const items = itemsOf(cat);
         if (items.length === 0) return null;
         return (
           <CategoryBlock
@@ -45,9 +60,9 @@ export async function SeriesIndex({ categoryId, showTitles = true }: { categoryI
         );
       })}
       {!categoryId && (() => {
-        const assigned = new Set<string>();
-        CATEGORIES.forEach((c) => c.slugs.forEach((s) => assigned.add(s)));
-        const orphans = all.filter((s) => !assigned.has(s.slug) && s.count > 0);
+        const orphans = all.filter(
+          (s) => (!s.category || !knownIds.has(s.category)) && s.count > 0,
+        );
         return orphans.length > 0 ? (
           <CategoryBlock id="autres" title="Autres" items={orphans} showTitle={showTitles} />
         ) : null;
