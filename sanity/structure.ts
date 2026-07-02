@@ -85,7 +85,19 @@ export const structure: StructureResolver = (S) =>
             .child((seriesId) => artworksOfSeries(S, seriesId)),
         ),
       S.divider(),
-      S.documentTypeListItem("artwork").title("Ajouter / modifier une œuvre"),
+      // Recherche globale uniquement : le + est retiré (initialValueTemplates
+      // vide) pour qu'il n'y ait qu'UN chemin de création d'œuvre, via la
+      // rubrique (qui pré-remplit le champ Rubrique). Une œuvre créée sans
+      // rubrique n'apparaîtrait nulle part sur le site.
+      S.listItem()
+        .title("Retrouver une œuvre")
+        .id("recherche-oeuvre")
+        .child(
+          S.documentTypeList("artwork")
+            .title("Retrouver une œuvre")
+            // ⚠️ DOIT rester le DERNIER appel de la chaîne (voir artworksOfSeries).
+            .initialValueTemplates([]),
+        ),
       S.documentTypeListItem("series").title("Ajouter / modifier une rubrique"),
       S.divider(),
       S.listItem()
