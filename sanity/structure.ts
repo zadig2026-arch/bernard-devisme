@@ -98,7 +98,17 @@ export const structure: StructureResolver = (S) =>
             // ⚠️ DOIT rester le DERNIER appel de la chaîne (voir artworksOfSeries).
             .initialValueTemplates([]),
         ),
-      S.documentTypeListItem("series").title("Ajouter / modifier une rubrique"),
+      // Modification seule : le + est retiré, la création de rubrique passe
+      // par sa partie du site (Peinture, Sculpture...) qui pré-coche la partie.
+      S.listItem()
+        .title("Modifier une rubrique")
+        .id("modifier-rubrique")
+        .child(
+          S.documentTypeList("series")
+            .title("Modifier une rubrique")
+            // ⚠️ DOIT rester le DERNIER appel de la chaîne (voir artworksOfSeries).
+            .initialValueTemplates([]),
+        ),
       S.divider(),
       S.listItem()
         .title("Texte d'accueil")
