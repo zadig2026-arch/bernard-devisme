@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PortableText, type PortableTextBlock, type PortableTextComponents } from "next-sanity";
 import { ArtworkCard } from "@/components/artwork-card";
 import { EmptyState } from "@/components/empty-state";
 import { SeriesIndex } from "@/components/series-index";
@@ -6,8 +7,31 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import { homeQuery } from "@/sanity/lib/queries";
 import { formatDate } from "@/lib/format";
 
+// Rendu du texte d'accueil édité au Studio : liens internes via next/link.
+const introComponents: PortableTextComponents = {
+  marks: {
+    link: ({ value, children }) => {
+      const href: string = value?.href ?? "#";
+      return href.startsWith("/") ? (
+        <Link href={href} className="underline underline-offset-4 hover:text-[color:var(--color-ink)]">
+          {children}
+        </Link>
+      ) : (
+        <a
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+          className="underline underline-offset-4 hover:text-[color:var(--color-ink)]"
+        >
+          {children}
+        </a>
+      );
+    },
+  },
+};
+
 type HomeData = {
-  settings?: { intro?: unknown; agentInfo?: { name?: string; role?: string } };
+  settings?: { intro?: PortableTextBlock[]; agentInfo?: { name?: string; role?: string } };
   featuredArtworks?: Array<{
     _id: string;
     title: string;
@@ -47,36 +71,44 @@ export default async function HomePage() {
           <p className="eyebrow">Atelier — Nieul-les-Saintes</p>
           <h1 className="heading-display mt-3 text-3xl md:text-4xl">Bernard&nbsp;Devisme</h1>
           <div className="mt-5 font-serif text-[0.95rem] md:text-base leading-[1.55] text-[color:var(--color-ink-muted)] space-y-3 max-w-[62ch]">
-            <p>
-              Peintre, sculpteur et infographiste, né en 1947, diplômé des Beaux-Arts de Paris en 1970
-              (mention très bien) après avoir passé 4 années dans les ateliers
-              d&rsquo;Étienne Martin, Robert Couturier, César et Collamarini.
-            </p>
-            <p>
-              Professeur d&rsquo;Arts Plastiques et d&rsquo;Infographie à l&rsquo;École Alsacienne à
-              Paris pendant 35 ans. Je m&rsquo;installe en Vendée en 2007 puis en Charente-Maritime en 2016.
-            </p>
-            <p>
-              Expositions et installations in situ, collectives et personnelles, en France et à
-              l&rsquo;étranger, dès les années 70.
-            </p>
-            <p>
-              Co-directeur de la galerie «&nbsp;Art Libre&nbsp;» de 1988 à 1990 à Rambouillet (78),
-              puis directeur de l&rsquo;espace d&rsquo;art contemporain «&nbsp;Confluences&nbsp;»
-              jusqu&rsquo;en 1992.
-            </p>
-            <p>
-              Dessins de presse dans <em>L&rsquo;Écho Républicain</em> (Chartres, 1984–1991) puis dans{" "}
-              <em>Ouest-France</em> (Fontenay-le-Comte, 2008–2017).
-            </p>
-            <p>
-              Différentes personnes (françaises ou étrangères), artistes, écrivains, critiques
-              d&rsquo;art, responsables d&rsquo;institutions culturelles ont défendu mon travail.
-              Retrouvez leurs écrits dans la rubrique{" "}
-              <Link href="/regards" className="underline underline-offset-4 hover:text-[color:var(--color-ink)]">
-                Regards d&rsquo;après…
-              </Link>
-            </p>
+            {data.settings?.intro?.length ? (
+              // Bio éditée par Bernard au Studio (entrée « Texte d'accueil »).
+              <PortableText value={data.settings.intro} components={introComponents} />
+            ) : (
+              // Filet de sécurité si le champ est vidé dans Sanity.
+              <>
+                <p>
+                  Peintre, sculpteur et infographiste, né en 1947, diplômé des Beaux-Arts de Paris en 1970
+                  (mention très bien) après avoir passé 4 années dans les ateliers
+                  d&rsquo;Étienne Martin, Robert Couturier, César et Collamarini.
+                </p>
+                <p>
+                  Professeur d&rsquo;Arts Plastiques et d&rsquo;Infographie à l&rsquo;École Alsacienne à
+                  Paris pendant 35 ans. Je m&rsquo;installe en Vendée en 2007 puis en Charente-Maritime en 2016.
+                </p>
+                <p>
+                  Expositions et installations in situ, collectives et personnelles, en France et à
+                  l&rsquo;étranger, dès les années 70.
+                </p>
+                <p>
+                  Co-directeur de la galerie «&nbsp;Art Libre&nbsp;» de 1988 à 1990 à Rambouillet (78),
+                  puis directeur de l&rsquo;espace d&rsquo;art contemporain «&nbsp;Confluences&nbsp;»
+                  jusqu&rsquo;en 1992.
+                </p>
+                <p>
+                  Dessins de presse dans <em>L&rsquo;Écho Républicain</em> (Chartres, 1984–1991) puis dans{" "}
+                  <em>Ouest-France</em> (Fontenay-le-Comte, 2008–2017).
+                </p>
+                <p>
+                  Différentes personnes (françaises ou étrangères), artistes, écrivains, critiques
+                  d&rsquo;art, responsables d&rsquo;institutions culturelles ont défendu mon travail.
+                  Retrouvez leurs écrits dans la rubrique{" "}
+                  <Link href="/regards" className="underline underline-offset-4 hover:text-[color:var(--color-ink)]">
+                    Regards d&rsquo;après…
+                  </Link>
+                </p>
+              </>
+            )}
           </div>
 
           <div className="mt-6 flex flex-wrap gap-4 text-sm">
