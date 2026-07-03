@@ -64,7 +64,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
 
       <header className="mt-8 grid gap-6 md:grid-cols-12">
         <div className="md:col-span-8">
-          <p className="eyebrow">Série · {s.period}</p>
+          <p className="eyebrow">{s.period ? `Série · ${s.period}` : "Série"}</p>
           <h1 className="heading-display mt-3 text-3xl md:text-4xl italic">{s.title}</h1>
         </div>
         <div className="md:col-span-4">
