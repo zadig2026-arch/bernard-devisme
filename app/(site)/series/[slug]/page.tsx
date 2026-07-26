@@ -78,7 +78,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
           ...declared.map((g) => ({
             key: g._key,
             heading: (
-              <div className="mb-6 border-t border-[color:var(--color-rule)] pt-6">
+              <div key={g._key} className="mb-6 border-t border-[color:var(--color-rule)] pt-6">
                 <h2 className="heading-display text-2xl md:text-3xl italic">{g.title}</h2>
                 {g.text ? (
                   <div className="mt-3">
