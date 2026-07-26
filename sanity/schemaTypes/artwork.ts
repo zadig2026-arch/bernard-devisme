@@ -1,5 +1,6 @@
 import { defineField, defineType } from "sanity";
 import { ArtworkInputWithDelete } from "../components/artwork-input-with-delete";
+import { SubseriesInput } from "../components/subseries-input";
 
 export const artwork = defineType({
   name: "artwork",
@@ -35,6 +36,15 @@ export const artwork = defineType({
       type: "reference",
       description: "Dans quelle rubrique ranger cette œuvre.",
       to: [{ type: "series" }],
+    }),
+    // Groupe d'œuvres à l'intérieur de la rubrique. La valeur est le `_key`
+    // d'une entrée du tableau `subseries` de la rubrique ; le champ n'apparaît
+    // que si la rubrique en déclare (voir SubseriesInput).
+    defineField({
+      name: "subseries",
+      title: "Groupe dans la rubrique (facultatif)",
+      type: "string",
+      components: { input: SubseriesInput },
     }),
 
     // --- Détails facultatifs ---

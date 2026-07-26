@@ -61,3 +61,6 @@ data/videos/
 .claude/launch.json
 .claude/settings.local.json
 
+
+# Pages archivées de l'ancien e-monsite (cache local du script de récupération)
+data/legacy-html/

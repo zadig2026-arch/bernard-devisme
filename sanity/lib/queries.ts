@@ -40,8 +40,10 @@ export const allSeriesQuery = groq`*[_type == "series"]|order(period desc){
 
 export const seriesBySlugQuery = groq`*[_type == "series" && slug.current == $slug][0]{
   _id, title, period, statement,
+  subseries[]{_key, title, text},
   "artworks": *[_type == "artwork" && references(^._id)]|order(year desc){
     _id, title, "slug": slug.current, year, medium, dimensions, saleStatus, "images": images[defined(asset)],
+    subseries,
     "audioUrl": audio.asset->url,
     "videoUrl": video.asset->url
   }

@@ -12,19 +12,26 @@
  */
 export type Category = { id: string; title: string; slugs: string[] };
 
+/**
+ * Numéro d'un « album » de peintures d'après son titre, ex. « peintures
+ * album 3 (1505-1648) » → 3. Ces albums s'affichent en tête de la partie
+ * Peinture, du plus grand numéro au plus petit : un album créé plus tard se
+ * range donc tout seul en haut, sans toucher au code (demande de Bernard,
+ * 25/07/2026). Les albums lettrés (A, B), plus anciens, gardent leur place
+ * habituelle et ne sont volontairement pas concernés.
+ */
+export function albumNumber(title: string): number | null {
+  const m = title.match(/album\s*(\d+)(?!\d)/i);
+  return m ? Number(m[1]) : null;
+}
+
 export const CATEGORIES: Category[] = [
   {
     id: "peinture",
     title: "Peinture",
     slugs: [
-      // Albums de peintures en ordre décroissant (le plus récent d'abord),
-      // demande de Bernard ; le reste des rubriques ne bouge pas.
-      "peintures-album-6",
-      "peintures-album-5",
-      "peintures-album-4",
-      "peintures-album-3",
-      "peintures-album-2",
-      "peintures-album-1",
+      // Les albums numérotés ne sont plus listés ici : ils passent en tête
+      // automatiquement, du plus récent au plus ancien (voir albumNumber).
       "wx",
       "la-divine-comedie-serie-2020",
       "transitions-2",

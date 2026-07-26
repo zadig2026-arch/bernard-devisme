@@ -19,7 +19,7 @@ const allSeriesQuery = groq`*[_type == "series"]{
 }`;
 
 // Mapping catégorie → séries partagé avec la navigation du Studio.
-import { CATEGORIES } from "@/lib/categories";
+import { CATEGORIES, albumNumber } from "@/lib/categories";
 
 export async function SeriesIndex({ categoryId, showTitles = true }: { categoryId?: string; showTitles?: boolean } = {}) {
   const all = await sanityFetch<SeriesEntry[]>(allSeriesQuery, {}, []);
@@ -32,16 +32,28 @@ export async function SeriesIndex({ categoryId, showTitles = true }: { categoryI
   // L'appartenance vient du champ `category` (Sanity, éditable par Bernard) ;
   // la liste de slugs historique ne sert plus qu'à préserver l'ordre
   // d'affichage de l'ancien site, les nouvelles rubriques venant à la suite.
+  //
+  // Exception : les « albums » numérotés de peintures passent en tête, du plus
+  // récent au plus ancien (demande de Bernard). C'est calculé à partir du
+  // numéro dans le titre, donc un « peintures album 7 » créé plus tard se
+  // place tout seul en haut, sans intervention.
   const itemsOf = (cat: (typeof CATEGORIES)[number]) => {
     const legacyOrder = new Map(cat.slugs.map((s, i) => [s, i]));
+    const rank = (s: SeriesEntry) =>
+      albumNumber(s.title) !== null
+        ? -1
+        : (legacyOrder.get(s.slug) ?? Number.MAX_SAFE_INTEGER);
     return all
       .filter((s) => s.category === cat.id && s.count > 0)
-      .sort(
-        (a, b) =>
-          (legacyOrder.get(a.slug) ?? Number.MAX_SAFE_INTEGER) -
-            (legacyOrder.get(b.slug) ?? Number.MAX_SAFE_INTEGER) ||
-          a.title.localeCompare(b.title, "fr"),
-      );
+      .sort((a, b) => {
+        const ra = rank(a);
+        const rb = rank(b);
+        if (ra !== rb) return ra - rb;
+        const na = albumNumber(a.title);
+        const nb = albumNumber(b.title);
+        if (na !== null && nb !== null) return nb - na; // 7, 6, 5…
+        return a.title.localeCompare(b.title, "fr");
+      });
   };
 
   return (

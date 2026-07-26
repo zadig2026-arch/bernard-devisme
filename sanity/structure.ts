@@ -85,19 +85,12 @@ export const structure: StructureResolver = (S) =>
             .child((seriesId) => artworksOfSeries(S, seriesId)),
         ),
       S.divider(),
-      // Recherche globale uniquement : le + est retiré (initialValueTemplates
-      // vide) pour qu'il n'y ait qu'UN chemin de création d'œuvre, via la
-      // rubrique (qui pré-remplit le champ Rubrique). Une œuvre créée sans
-      // rubrique n'apparaîtrait nulle part sur le site.
-      S.listItem()
-        .title("Retrouver une œuvre")
-        .id("recherche-oeuvre")
-        .child(
-          S.documentTypeList("artwork")
-            .title("Retrouver une œuvre")
-            // ⚠️ DOIT rester le DERNIER appel de la chaîne (voir artworksOfSeries).
-            .initialValueTemplates([]),
-        ),
+      // « Retrouver une œuvre » (liste globale des œuvres) a été retirée le
+      // 27/07/2026 : Bernard la jugeait inutile, il passe toujours par la
+      // rubrique. Le seul chemin de création d'œuvre reste la rubrique, qui
+      // pré-remplit le champ Rubrique (une œuvre sans rubrique serait
+      // invisible sur le site).
+      //
       // Modification seule : le + est retiré, la création de rubrique passe
       // par sa partie du site (Peinture, Sculpture...) qui pré-coche la partie.
       S.listItem()
