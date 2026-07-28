@@ -5,9 +5,11 @@ import { SeriesGallery, type GalleryGroup, type GalleryItem } from "@/components
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { seriesBySlugQuery, allSeriesSlugsQuery } from "@/sanity/lib/queries";
 import { urlForImage } from "@/sanity/lib/image";
+import { sortArtworks } from "@/lib/artwork-order";
 
 type Artwork = {
   _id: string;
+  _createdAt?: string;
   title: string;
   slug: string;
   year?: number;
@@ -58,7 +60,10 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
     saleStatus: a.saleStatus,
   });
 
-  const artworks = (s.artworks ?? []).filter((a) => a.images?.[0]);
+  // Du plus récent au plus ancien, d'après le numéro de l'œuvre (voir
+  // lib/artwork-order.ts). Le tri s'applique aussi à l'intérieur de chaque
+  // groupe d'œuvres, puisque les groupes filtrent cette liste déjà ordonnée.
+  const artworks = sortArtworks((s.artworks ?? []).filter((a) => a.images?.[0]));
   const declared = s.subseries ?? [];
   const declaredKeys = new Set(declared.map((g) => g._key));
 

@@ -51,6 +51,8 @@ const ENTITIES = {
   laquo: "«", raquo: "»", eacute: "é", egrave: "è", ecirc: "ê", euml: "ë",
   agrave: "à", acirc: "â", ccedil: "ç", ocirc: "ô", ugrave: "ù", ucirc: "û",
   icirc: "î", iuml: "ï", oelig: "œ", Eacute: "É", Egrave: "È", Agrave: "À",
+  Ecirc: "Ê", Acirc: "Â", Ocirc: "Ô", Ucirc: "Û", Icirc: "Î", Ccedil: "Ç",
+  Euml: "Ë", Iuml: "Ï", Ouml: "Ö", Uuml: "Ü", OElig: "Œ", Ugrave: "Ù",
   rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—",
   deg: "°", middot: "·", bull: "•", times: "×", euro: "€", trade: "™",
 };
@@ -141,8 +143,43 @@ function parseLegacyPage(html) {
   return { intro, rows, introRowCount: introRows.length };
 }
 
+/**
+ * Pages de l'ancien site absentes de `catalogue.json` : le scrape initial
+ * (avril 2026) n'a suivi que les rubriques d'œuvres, alors que le crawl
+ * complet (`.firecrawl/all-urls.json`) en dénombre d'autres. Ajoutées le
+ * 29/07/2026, Bernard réclamant SES textes — « n'ayant plus la main sur
+ * e-monsite, je n'ai plus les textes » — et pas seulement ceux des rubriques
+ * déjà migrées.
+ *
+ * Deux d'entre elles correspondent à des rubriques Sanity restées sans texte
+ * (« Les peintures abstraites », « Concrétions ») ; les autres (parcours,
+ * expositions passées, presse) n'ont pas d'équivalent dans le CMS et ne
+ * serviront qu'au document de restitution.
+ */
+const BASE = "http://www.devismebernardpeintre.com";
+const EXTRA_PAGES = [
+  { slug: "les-peintures-abstraites", title: "Les peintures abstraites", sourceUrl: `${BASE}/pages/annee-2013/les-peintures-abstraites.html` },
+  { slug: "concretions", title: "Concrétions", sourceUrl: `${BASE}/pages/annee-2013/concretions.html` },
+  { slug: "les-gueules", title: "les gueules", sourceUrl: `${BASE}/pages/dessin/les-gueules.html` },
+  { slug: "plus", title: "plus...", sourceUrl: `${BASE}/pages/et-plus-encore/plus.html` },
+  { slug: "peintures-2024", title: "peintures 2024", sourceUrl: `${BASE}/pages/annee-2013/-peintures-2024.html` },
+  { slug: "expositions-personnelles", title: "Expositions personnelles", sourceUrl: `${BASE}/pages/parcours/expositions-personnelles.html` },
+  { slug: "coupure-de-presse", title: "Coupures de presse", sourceUrl: `${BASE}/pages/parcours/coupure-de-presse.html` },
+  { slug: "la-page-de-son-agent", title: "La page de son agent", sourceUrl: `${BASE}/pages/parcours/la-page-de-son-agent.html` },
+  { slug: "regards-d-apres", title: "Regards d'après", sourceUrl: `${BASE}/pages/parcours/regards-d-apres.html` },
+  { slug: "atelier", title: "L'atelier", sourceUrl: `${BASE}/pages/annee-2013/atelier.html` },
+  { slug: "l-oeil-du-maitre", title: "L'œil du maître", sourceUrl: `${BASE}/pages/annee-2013/l-oeil-du-maitre.html` },
+  { slug: "la-commanderie-des-antonins", title: "La Commanderie des Antonins à Saint-Marc-la-Lande", sourceUrl: `${BASE}/pages/annee-2013/la-commanderie-des-antonins-a-saint-marc-la-lande.html` },
+  { slug: "exposition-d-un-regard-l-autre", title: "Exposition « D'un regard l'autre »", sourceUrl: `${BASE}/pages/annee-2013/exposition-d-un-regard-l-autre.html` },
+  { slug: "exposition-petits-formats", title: "Exposition petits formats", sourceUrl: `${BASE}/agenda/exposition-petits-formats.html` },
+];
+
 const catalogue = JSON.parse(readFileSync(CATALOGUE, "utf8"));
-const series = catalogue.series.filter((s) => !ONLY || s.slug === ONLY);
+const known = new Set(catalogue.series.map((s) => s.slug));
+const series = [
+  ...catalogue.series,
+  ...EXTRA_PAGES.filter((p) => !known.has(p.slug)),
+].filter((s) => !ONLY || s.slug === ONLY);
 
 const report = [];
 for (const s of series) {

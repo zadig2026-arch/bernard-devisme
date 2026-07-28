@@ -1,4 +1,5 @@
 import type { StructureResolver, StructureBuilder } from "sanity/structure";
+import { EditIcon, ImagesIcon } from "@sanity/icons";
 import { CATEGORIES, type Category } from "../lib/categories";
 
 /**
@@ -13,7 +14,7 @@ import { CATEGORIES, type Category } from "../lib/categories";
 /** Les œuvres d'une rubrique. Créer une œuvre ici pré-remplit sa rubrique. */
 const artworksOfSeries = (S: StructureBuilder, seriesId: string) =>
   S.documentList()
-    .title("Œuvres de la rubrique")
+    .title("Les œuvres")
     .schemaType("artwork")
     .apiVersion("2024-01-01")
     .filter('_type == "artwork" && series._ref == $seriesId')
@@ -23,6 +24,36 @@ const artworksOfSeries = (S: StructureBuilder, seriesId: string) =>
     // clone le builder et ré-infère les templates par défaut, ce qui écrase
     // les templates personnalisés posés avant.
     .initialValueTemplates([S.initialValueTemplateItem("artwork-in-series", { seriesId })]);
+
+/**
+ * Ce qu'on voit en ouvrant une rubrique : ses œuvres, ET le formulaire de la
+ * rubrique elle-même (titre, texte, groupes d'œuvres).
+ *
+ * Ajouté le 29/07/2026 : le clic sur une rubrique menait droit à ses œuvres,
+ * sans aucun chemin vers le formulaire de la rubrique. Bernard cherchait les
+ * « groupes d'œuvres » dans Peinture et devait en fait ressortir jusqu'à
+ * « Modifier une rubrique », tout en bas du menu. Il perdait le fil.
+ */
+const seriesMenu = (S: StructureBuilder, seriesId: string, seriesTitle: string) =>
+  S.list()
+    .title(seriesTitle)
+    .items([
+      S.listItem()
+        .title("Les œuvres")
+        .id("oeuvres")
+        .icon(ImagesIcon)
+        .child(artworksOfSeries(S, seriesId)),
+      S.listItem()
+        .title("Titre, texte et groupes d'œuvres")
+        .id("rubrique")
+        .icon(EditIcon)
+        .child(
+          S.document()
+            .schemaType("series")
+            .documentId(seriesId)
+            .title("Titre, texte et groupes d'œuvres"),
+        ),
+    ]);
 
 /**
  * Une partie du site (Peinture, Sculpture...) : ses rubriques → leurs œuvres.
@@ -49,11 +80,14 @@ const categoryItem = (S: StructureBuilder, cat: Category) =>
         .defaultOrdering([{ field: "title", direction: "asc" }])
         .child(async (seriesId, { structureContext }) => {
           const client = structureContext.getClient({ apiVersion: "2024-01-01" });
-          const published = await client.fetch<boolean>("count(*[_id == $id]) > 0", {
+          const title = await client.fetch<string | null>("*[_id == $id][0].title", {
             id: seriesId,
           });
-          return published
-            ? artworksOfSeries(S, seriesId)
+          // `title` ne répond que sur un document PUBLIÉ : une rubrique en
+          // cours de création par le « + » n'a qu'un brouillon, et il faut
+          // alors ouvrir son formulaire, pas la liste (vide) de ses œuvres.
+          return title !== null
+            ? seriesMenu(S, seriesId, title || "Rubrique")
             : S.document()
                 .schemaType("series")
                 .documentId(seriesId)
@@ -82,7 +116,13 @@ export const structure: StructureResolver = (S) =>
             .filter('_type == "series" && (!defined(category) || !(category in $cats))')
             .params({ cats: CATEGORIES.map((c) => c.id) })
             .defaultOrdering([{ field: "title", direction: "asc" }])
-            .child((seriesId) => artworksOfSeries(S, seriesId)),
+            .child(async (seriesId, { structureContext }) => {
+              const client = structureContext.getClient({ apiVersion: "2024-01-01" });
+              const title = await client.fetch<string | null>("*[_id == $id][0].title", {
+                id: seriesId,
+              });
+              return seriesMenu(S, seriesId, title || "Rubrique");
+            }),
         ),
       S.divider(),
       // « Retrouver une œuvre » (liste globale des œuvres) a été retirée le

@@ -32,6 +32,8 @@ One-off migration / import scripts live in `scripts/` (run with `node scripts/<n
 
 **Sub-series (groupes d'œuvres)**: a rubric can be split into titled groups. `series.subseries` is the ordered list (title + optional text); `artwork.subseries` stores the `_key` of its group and is edited through `SubseriesInput`, a radio list fed by the parent series. The series page renders one block per group, ungrouped works first, and the lightbox still walks the whole rubric. `scripts/harvest-legacy-texts-2026-07.mjs` + `apply-legacy-texts-2026-07.mjs` rebuilt these groups (and the rubric texts) from the Wayback Machine snapshots of the old e-monsite; the `PROTECTED` set in the apply script lists the rubrics Bernard wrote himself, never to be overwritten.
 
+**Artwork ordering**: `lib/artwork-order.ts` is the single source of truth — newest first, by the number Bernard writes at the start of the title (`1417`), falling back to the number baked into a legacy `artwork-*` id, then to `_createdAt`. The number is read, never stored. GROQ must NOT sort artwork lists (`year` is empty on all 811 works, so `|order(year desc)` sorted nothing and Sanity silently fell back to id order — legacy imports looked chronological, Studio-created works landed at random). Every artwork query therefore selects `_createdAt` and the page sorts.
+
 **Route discrimination at `/oeuvres/[slug]`**: a single dynamic segment handles both category pages (slug matches a `CATEGORY_IDS` value → renders `<SeriesIndex categoryId={...} />`) and individual artwork pages (slug matches a Sanity artwork → renders the detail view). This avoids a sibling-segment conflict with a separate `[category]` folder. `generateStaticParams` returns the union of both. Don't introduce an artwork slug that collides with a category id.
 
 **Featured hero artwork**: driven by the `featured: boolean` flag on `artwork`. `homeQuery` filters by `featured == true`. To swap the hero, toggle the flag on the artworks (Sanity Studio or MCP) — there's no separate "featured" document.
@@ -39,6 +41,8 @@ One-off migration / import scripts live in `scripts/` (run with `node scripts/<n
 **Site nav** (`components/site-header.tsx`): the top nav purposefully mirrors the original e-monsite's six rubrics (Peinture / Sculpture / Graphisme / Infographies / Livres-objets et plus / Parcours et CV). Expositions / Journal / Regards / Contact pages exist but are reachable only via internal links, not the top nav — this is deliberate per the artist's feedback ("voir la totalité des rubriques sans déroulant").
 
 **Legacy URL redirects**: `next.config.ts` redirects old `/pages/...` paths from the e-monsite to their new equivalents. When restructuring routes, update this list to keep external links working.
+
+**Studio navigation**: opening a rubric under its part of the site (Peinture, Sculpture…) shows a two-entry list — « Les œuvres » and « Titre, texte et groupes d'œuvres » — so the rubric's own form is reachable from where Bernard actually looks for it. « Modifier une rubrique » at the bottom of the menu is kept on purpose: he has just learned that path. `sanity/theme.ts` restyles the Studio in the site's colours (paper, ink, sienna) because the default all-white panes left him unable to tell where he was.
 
 **Sanity Studio** is mounted at `app/studio/[[...tool]]/page.tsx` and authenticates via the artist's `@orange.fr` email magic link. The studio runs inside the same Next.js app — `npm run build` produces both the public site and the Studio bundle.
 

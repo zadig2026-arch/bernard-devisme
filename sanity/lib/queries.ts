@@ -1,9 +1,17 @@
 import { groq } from "next-sanity";
 
+/**
+ * Les listes d'œuvres ne sont volontairement PAS triées en GROQ : leur ordre
+ * d'affichage vient du numéro que Bernard met dans le titre, que seul
+ * `lib/artwork-order.ts` sait lire. D'où le `_createdAt` demandé partout (il
+ * départage les œuvres sans numéro). Ne pas remettre de `|order(year …)` :
+ * le champ `year` est vide sur toutes les œuvres, ce tri ne triait rien.
+ */
+
 export const homeQuery = groq`{
   "settings": *[_type == "siteSettings"][0]{ intro, agentInfo },
-  "featuredArtworks": *[_type == "artwork" && featured == true]|order(year desc)[0...6]{
-    _id, title, "slug": slug.current, year, medium, dimensions, "images": images[defined(asset)]
+  "featuredArtworks": *[_type == "artwork" && featured == true][0...6]{
+    _id, _createdAt, title, "slug": slug.current, year, medium, dimensions, "images": images[defined(asset)]
   },
   "series": *[_type == "series"]|order(period desc)[0...3]{
     _id, title, "slug": slug.current, period, statement, coverArtwork->{ "images": images[defined(asset)], title }
@@ -27,8 +35,8 @@ export const artworkBySlugQuery = groq`*[_type == "artwork" && slug.current == $
   "exhibitions": *[_type == "exhibition" && references(^._id)]|order(startDate desc){
     title, "slug": slug.current, venue, city, startDate, endDate
   },
-  "related": *[_type == "artwork" && series._ref == ^.series._ref && _id != ^._id]|order(year desc)[0...4]{
-    _id, title, "slug": slug.current, year, "images": images[defined(asset)]
+  "related": *[_type == "artwork" && series._ref == ^.series._ref && _id != ^._id]{
+    _id, _createdAt, title, "slug": slug.current, year, "images": images[defined(asset)]
   }
 }`;
 
@@ -41,8 +49,8 @@ export const allSeriesQuery = groq`*[_type == "series"]|order(period desc){
 export const seriesBySlugQuery = groq`*[_type == "series" && slug.current == $slug][0]{
   _id, title, period, statement,
   subseries[]{_key, title, text},
-  "artworks": *[_type == "artwork" && references(^._id)]|order(year desc){
-    _id, title, "slug": slug.current, year, medium, dimensions, saleStatus, "images": images[defined(asset)],
+  "artworks": *[_type == "artwork" && references(^._id)]{
+    _id, _createdAt, title, "slug": slug.current, year, medium, dimensions, saleStatus, "images": images[defined(asset)],
     subseries,
     "audioUrl": audio.asset->url,
     "videoUrl": video.asset->url

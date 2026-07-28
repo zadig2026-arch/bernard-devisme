@@ -12,6 +12,7 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import { artworkBySlugQuery, allArtworkSlugsQuery } from "@/sanity/lib/queries";
 import { urlForImage } from "@/sanity/lib/image";
 import { formatDateRange } from "@/lib/format";
+import { sortArtworks } from "@/lib/artwork-order";
 
 type Artwork = {
   title?: string;
@@ -32,7 +33,14 @@ type Artwork = {
     startDate?: string;
     endDate?: string;
   }>;
-  related?: Array<{ _id: string; title: string; slug: string; year?: number; images?: Array<unknown> }>;
+  related?: Array<{
+    _id: string;
+    _createdAt?: string;
+    title: string;
+    slug: string;
+    year?: number;
+    images?: Array<unknown>;
+  }>;
 };
 
 export async function generateStaticParams() {
@@ -87,6 +95,8 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
   if (!a) notFound();
 
   const displayTitle = a.title?.trim() || "Sans titre";
+  // Les voisines de la rubrique, dans le même ordre que la page de rubrique.
+  const related = sortArtworks(a.related ?? []).slice(0, 4);
 
   return (
     <article className="container-page py-12 md:py-16">
@@ -158,11 +168,11 @@ export default async function ArtworkPage({ params }: { params: Promise<{ slug: 
         </aside>
       </div>
 
-      {a.related && a.related.length > 0 && (
+      {related.length > 0 && (
         <section className="mt-20">
           <h2 className="heading-display text-xl">Dans la même série</h2>
           <div className="mt-6 grid gap-x-4 gap-y-8 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6">
-            {a.related.map((r) => (
+            {related.map((r) => (
               <ArtworkCard
                 key={r._id}
                 slug={r.slug}

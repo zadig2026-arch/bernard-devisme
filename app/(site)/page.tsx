@@ -6,6 +6,7 @@ import { SeriesIndex } from "@/components/series-index";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { homeQuery } from "@/sanity/lib/queries";
 import { formatDate } from "@/lib/format";
+import { sortArtworks } from "@/lib/artwork-order";
 
 // Rendu du texte d'accueil édité au Studio : liens internes via next/link.
 const introComponents: PortableTextComponents = {
@@ -34,6 +35,7 @@ type HomeData = {
   settings?: { intro?: PortableTextBlock[]; agentInfo?: { name?: string; role?: string } };
   featuredArtworks?: Array<{
     _id: string;
+    _createdAt?: string;
     title: string;
     slug: string;
     year?: number;
@@ -60,7 +62,7 @@ type HomeData = {
 
 export default async function HomePage() {
   const data = await sanityFetch<HomeData>(homeQuery, {}, {});
-  const featured = data.featuredArtworks ?? [];
+  const featured = sortArtworks(data.featuredArtworks ?? []);
   const series = data.series ?? [];
   const journal = data.latestJournal ?? [];
 

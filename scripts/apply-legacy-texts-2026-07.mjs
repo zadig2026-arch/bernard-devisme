@@ -23,6 +23,8 @@ const go = process.argv.includes("--go");
 // après une correction de mise en forme). Les textes de Bernard (PROTECTED)
 // restent intouchables.
 const rewrite = process.argv.includes("--rewrite");
+// --diff : affiche l'avant/après de chaque texte réécrit (à lire avant --go).
+const diff = process.argv.includes("--diff");
 const onlyIdx = process.argv.indexOf("--only");
 const ONLY = onlyIdx > -1 ? process.argv[onlyIdx + 1] : null;
 
@@ -43,6 +45,14 @@ const client = createClient({
 
 let keyCounter = 0;
 const nextKey = (prefix) => `${prefix}${(keyCounter++).toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+
+/** Portable Text → texte brut, pour comparer un texte en base à un texte calculé. */
+const plainText = (blocks) =>
+  (blocks ?? [])
+    .flatMap((b) => (b.children ?? []).map((c) => c.text ?? ""))
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
 
 const toBlocks = (lines) =>
   lines.map((text) => ({
@@ -67,25 +77,48 @@ const isCaption = (line) =>
   /^["«].{0,60}["»]?\s*\d{2,3}\s*[x×]\s*\d{2,3}/i.test(line) ||
   (line.split(/\s+/).length < 6 && line.length < 45);
 
+/** Légende de tableau : « format 60 x 73 », « acrylique sur toile », « 45 x 90 ». */
+const looksLikeCaption = (line) =>
+  /^(format|dimensions?|technique)\b/i.test(line) ||
+  /^(acrylique|huile|encre|aquarelle|pastel|fusain|gravure|monotype|collage|raku)\b/i.test(line) ||
+  /\d{2,3}\s*[x×]\s*\d{2,3}/.test(line);
+
 const isProse = (line) => !isJunk(line) && line.length >= 45 && !isCaption(line);
 
-/** L'intro tolère une phrase courte, mais pas les légendes ni les fichiers. */
+/**
+ * L'intro tolère une phrase courte, mais pas les légendes ni les fichiers.
+ * `looksLikeCaption` rattrape les légendes que le seuil de longueur laissait
+ * passer (« format 55 x 46 acrylique sur toile »), qui traînaient en fin de
+ * plusieurs textes de rubrique et s'y lisaient comme de la présentation.
+ */
 const isIntroProse = (line) =>
-  !isJunk(line) && !isCaption(line) && (line.length >= 40 || line.split(/\s+/).length >= 6);
+  !isJunk(line) &&
+  !isCaption(line) &&
+  !looksLikeCaption(line) &&
+  (line.length >= 40 || line.split(/\s+/).length >= 6);
 
 /**
  * e-monsite coupait les phrases en autant de <p> que de lignes affichées
  * (« … utilise avec une grande liberté des éléments (yeux, » / « bouches…) »).
  * On recolle : une ligne qui ne finit pas sur une ponctuation forte continue
  * dans la suivante.
+ *
+ * Le recollage doit voir les lignes BRUTES, pas les lignes déjà filtrées :
+ * une fin de phrase est souvent trop courte pour passer le filtre de prose et
+ * disparaissait donc avant d'avoir pu être recollée (« Les peintures
+ * abstraites » s'arrêtait sur « … rien dans », sans sa chute). D'où `keep`,
+ * qui dit quelles lignes ouvrent un paragraphe ; les autres ne servent qu'à
+ * compléter un paragraphe ouvert et resté en suspens, et jamais s'il s'agit
+ * d'une légende de tableau ou d'un nom de fichier.
  */
-function joinWrappedLines(lines) {
+function joinWrappedLines(lines, keep = () => true) {
   const out = [];
   for (const line of lines) {
     const prev = out[out.length - 1];
-    if (prev && !/[.!?:»"”)\]…]$/.test(prev)) {
+    const pending = prev && !/[.!?:»"”)\]…]$/.test(prev);
+    if (pending && !isJunk(line) && !looksLikeCaption(line)) {
       out[out.length - 1] = `${prev} ${line}`.replace(/\s+/g, " ");
-    } else {
+    } else if (keep(line)) {
       out.push(line);
     }
   }
@@ -101,6 +134,13 @@ const PROTECTED = new Set([
   "series-peintures",
   "series-les",
   "series-les-gueules",
+  // Textes saisis par Bernard le 27/07/2026 dans le Studio, après le premier
+  // passage de ce script (« j'ai commencé à mettre quelques textes »). Les
+  // titres ont changé depuis, pas les identifiants : `series-peintures-2023`
+  // s'appelle aujourd'hui « peintures album 3 » et `series-peintures-album-3 »
+  // « peintures album 6 ».
+  "series-peintures-2023",
+  "series-peintures-album-3",
 ]);
 
 const norm = (f) => f.toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]/g, "");
@@ -126,12 +166,26 @@ for (const entry of entries) {
   const patch = {};
 
   // 1. Texte d'intro de la rubrique.
-  const introLines = joinWrappedLines((entry.intro ?? []).filter(isIntroProse));
+  const introLines = joinWrappedLines(entry.intro ?? [], isIntroProse);
   if (introLines.length) {
     if (series.statement?.length && !(rewrite && !PROTECTED.has(series._id))) {
       skipped.push(`${series.title} : texte déjà présent, laissé tel quel`);
     } else {
-      patch.statement = toBlocks(introLines);
+      // `--diff` : ce que la réécriture changerait, avant de l'écrire. Les
+      // heuristiques de nettoyage ont déjà tronqué des textes en silence, on
+      // ne réécrit plus sans avoir relu.
+      const before = plainText(series.statement);
+      const after = introLines.join(" ");
+      if (before === after) {
+        skipped.push(`${series.title} : réécriture sans changement`);
+      } else {
+        if (diff) {
+          console.log(`\n~~~ ${series.title} (${series._id})`);
+          console.log(`  AVANT : ${before || "(vide)"}`);
+          console.log(`  APRÈS : ${after}`);
+        }
+        patch.statement = toBlocks(introLines);
+      }
     }
   }
 
