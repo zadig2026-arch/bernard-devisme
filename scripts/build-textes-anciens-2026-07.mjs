@@ -54,12 +54,36 @@ const pages = JSON.parse(readFileSync(`${ROOT}/data/legacy-texts.json`, "utf8"))
   (p) => !p.error,
 );
 
+/** Légende de tableau : « format 60 x 73 », « acrylique sur toile ». */
+const estLegende = (l) =>
+  /^(format|dimensions?|technique)\b/i.test(l) ||
+  /^(acrylique|huile|encre|aquarelle|pastel|fusain|gravure|monotype|collage|raku)\b/i.test(l) ||
+  /\d{2,3}\s*[x×]\s*\d{2,3}/.test(l);
+
+/**
+ * e-monsite coupait les phrases en autant de paragraphes que de lignes
+ * affichées. Recoller ce qui n'est pas fini rend le document lisible ; les
+ * légendes gardent leur ligne à elles.
+ */
+const recoller = (lignes) => {
+  const out = [];
+  for (const l of lignes) {
+    const prev = out[out.length - 1];
+    if (prev && !/[.!?:»"”)\]…]$/.test(prev) && !estLegende(l) && !estLegende(prev)) {
+      out[out.length - 1] = `${prev} ${l}`.replace(/\s+/g, " ");
+    } else {
+      out.push(l);
+    }
+  }
+  return out;
+};
+
 /** Tout le texte d'une page : l'intro, puis les blocs titrés qui la suivent. */
 const blocsDe = (p) => {
   const out = [];
-  if (p.intro?.length) out.push({ titre: null, lignes: p.intro });
+  if (p.intro?.length) out.push({ titre: null, lignes: recoller(p.intro) });
   for (const g of p.subseries ?? []) {
-    if (g.text?.length) out.push({ titre: g.title, lignes: g.text });
+    if (g.text?.length) out.push({ titre: g.title, lignes: recoller(g.text) });
   }
   return out;
 };
@@ -70,12 +94,11 @@ const sansTexte = pages.filter((p) => blocsDe(p).length === 0);
 const sections = withText
   .map((p) => {
     const cible = byId.get(`series-${p.slug}`) ?? bySlug.get(p.slug);
-    const dejaEnLigne = Boolean(cible?.texte?.trim());
     const statut = !cible
-      ? `<span class="statut absent">Cette page n'a pas de rubrique sur le nouveau site</span>`
-      : dejaEnLigne
-        ? `<span class="statut ok">Texte déjà en ligne dans « ${esc(cible.title)} »</span>`
-        : `<span class="statut todo">À recopier dans « ${esc(cible.title)} » si vous le souhaitez</span>`;
+      ? `<span class="statut">plus de rubrique</span>`
+      : cible.texte?.trim()
+        ? `<span class="statut">déjà en ligne</span>`
+        : `<span class="statut a-remettre">à remettre</span>`;
 
     const corps = blocsDe(p)
       .map(
@@ -86,9 +109,8 @@ const sections = withText
       .join("\n");
 
     return `<section>
-  <h3>${esc(p.title)}</h3>
-  ${statut}
-  <div class="texte">${corps}</div>
+  <h3>${esc(p.title)} ${statut}</h3>
+  ${corps}
 </section>`;
   })
   .join("\n");
@@ -97,72 +119,34 @@ const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Vos textes de l'ancien site — Bernard Devisme</title>
+<title>Tes textes de l'ancien site</title>
 <style>
-  @page { size: A4; margin: 18mm 16mm; }
+  @page { size: A4; margin: 20mm 18mm; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12.5pt; line-height: 1.55; color: #1a1a1a; }
-  .cover { height: 250mm; display: flex; flex-direction: column; justify-content: center; text-align: center; page-break-after: always; }
-  .cover .site { font-size: 12pt; letter-spacing: 3px; text-transform: uppercase; color: #777; margin-bottom: 14mm; }
-  .cover h1 { font-size: 32pt; font-weight: normal; line-height: 1.25; margin-bottom: 10mm; }
-  .cover .sub { font-size: 14pt; color: #444; margin-bottom: 20mm; }
-  .cover .note { margin-top: 20mm; font-size: 11pt; color: #777; }
-  .intro { page-break-after: always; }
-  h2 { font-size: 19pt; font-weight: normal; border-bottom: 1.5pt solid #1a1a1a; padding-bottom: 3mm; margin-bottom: 6mm; }
-  .intro p { margin-bottom: 4mm; }
-  .intro ul { margin: 0 0 5mm 6mm; }
-  .intro li { margin-bottom: 2.5mm; }
+  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12pt; line-height: 1.5; color: #1a1a1a; }
+  h1 { font-size: 20pt; font-weight: normal; margin-bottom: 4mm; }
+  .chapo { color: #555; margin-bottom: 10mm; }
   /* Les textes s'enchaînent : une section par page laisserait 40 pages
-     quasi vides. Seul le bloc titre + étiquette reste solidaire. */
-  section { margin-bottom: 8mm; padding-bottom: 4mm; border-bottom: 0.5pt solid #ccc; }
-  section > h3, section > .statut { break-after: avoid; page-break-after: avoid; }
-  h3 { font-size: 15pt; font-weight: normal; font-style: italic; margin-bottom: 2mm; }
-  h4 { font-size: 12.5pt; font-weight: bold; margin: 4mm 0 1.5mm; }
-  .statut { display: inline-block; font-family: Helvetica, Arial, sans-serif; font-size: 9.5pt; padding: 1mm 3mm; border-radius: 2mm; margin-bottom: 3mm; }
-  .statut.ok { background: #e8f0e4; color: #33562a; }
-  .statut.todo { background: #fdf0e0; color: #8a4a12; }
-  .statut.absent { background: #eee; color: #555; }
-  .texte p { margin-bottom: 2mm; }
-  .reste { page-break-before: always; }
-  .reste li { margin-bottom: 1.5mm; }
+     quasi vides. Seul le titre reste solidaire de son texte. */
+  section { margin-bottom: 7mm; }
+  h3 { font-size: 13pt; font-weight: bold; margin-bottom: 1.5mm; break-after: avoid; page-break-after: avoid; }
+  h4 { font-size: 12pt; font-style: italic; font-weight: normal; margin: 3mm 0 1mm; break-after: avoid; page-break-after: avoid; }
+  p { margin-bottom: 1.5mm; }
+  .statut { font-family: Helvetica, Arial, sans-serif; font-size: 8.5pt; font-weight: normal; color: #888; }
+  .statut.a-remettre { color: #8a4a12; }
+  .fin { margin-top: 10mm; padding-top: 4mm; border-top: 0.5pt solid #bbb; color: #555; font-size: 11pt; }
 </style>
 </head>
 <body>
 
-<div class="cover">
-  <div class="site">devismebernardpeintre.com</div>
-  <h1>Vos textes<br>de l'ancien site</h1>
-  <div class="sub">Tout ce qui a pu être retrouvé, page par page</div>
-  <div class="note">Document préparé par Zadig Becques · zadig.pro</div>
-</div>
-
-<div class="intro">
-  <h2>Ce que vous avez entre les mains</h2>
-  <p>Votre ancien site n'existe plus en ligne, mais il en reste des copies dans les archives publiques
-  du web. J'y ai récupéré vos textes, page par page. Ce document les rassemble tous.</p>
-  <p>Vous n'avez rien à faire d'urgent : la plupart sont <strong>déjà remis en place</strong> sur le
-  nouveau site. Chaque texte porte une étiquette :</p>
-  <ul>
-    <li><span class="statut ok">Texte déjà en ligne</span> il est sur le site, vous n'avez rien à faire.</li>
-    <li><span class="statut todo">À recopier</span> la rubrique existe, mais elle n'a pas encore ce texte.
-    Vous pouvez le recopier depuis ce document si vous le voulez.</li>
-    <li><span class="statut absent">Pas de rubrique</span> cette page de l'ancien site n'a pas
-    d'équivalent aujourd'hui (parcours, expositions passées). Le texte est conservé ici.</li>
-  </ul>
-  <p>Les textes sont donnés <strong>tels quels</strong>, y compris les indications de format et de
-  technique qui accompagnaient vos tableaux. Sur le site, ces légendes ont été écartées des textes de
-  présentation : elles s'y lisaient comme des phrases. Vous les retrouvez ici si vous en avez besoin.</p>
-</div>
+<h1>Tes textes de l'ancien site</h1>
+<p class="chapo">Retrouvés dans les archives du web, page par page. Ceux marqués « à remettre » ne
+sont pas encore sur le nouveau site.</p>
 
 ${sections}
 
-<div class="reste">
-  <h2>Pages sans texte retrouvé</h2>
-  <p>Ces pages de l'ancien site ne contenaient que des images, ou leur texte n'a pas survécu dans les
-  archives :</p>
-  <ul>
-    ${sansTexte.map((p) => `<li>${esc(p.title)}</li>`).join("\n    ")}
-  </ul>
+<div class="fin">
+  <p>Sans texte retrouvé : ${sansTexte.map((p) => esc(p.title)).join(", ")}.</p>
 </div>
 
 </body>
