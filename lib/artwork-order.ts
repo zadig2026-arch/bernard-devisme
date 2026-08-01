@@ -3,7 +3,12 @@
  *
  * Bernard numérote ses œuvres (« 1417 », « 373 l enrubané ») et cette
  * numérotation suit l'ordre où il les a peintes. C'est donc elle qui fait foi,
- * du plus récent au plus ancien (demande du 29/07/2026).
+ * du plus ancien au plus récent (numéros croissants).
+ *
+ * Le 29/07 on avait mis l'inverse, par analogie avec l'ordre des albums qu'il
+ * venait de valider (6 → 1). C'était une extrapolation : ses deux mails
+ * demandent « l'ordre chronologique » puis « de manière croissante »
+ * (01/08/2026), soit l'ordre de l'ancien e-monsite.
  *
  * Avant, la requête triait par `year` — champ resté vide sur les 811 œuvres.
  * Le tri ne triait donc rien et Sanity retombait sur l'identifiant interne :
@@ -53,17 +58,17 @@ export function artworkNumber(a: Orderable): number | null {
 }
 
 /**
- * Du plus récent au plus ancien. Les œuvres sans numéro ferment la marche,
- * les dernières ajoutées en premier — un ordre arbitraire mais stable, plutôt
- * que le hasard de l'identifiant.
+ * Numéros croissants. Les œuvres sans numéro ferment la marche, dans leur
+ * ordre d'ajout — un ordre arbitraire mais stable, plutôt que le hasard de
+ * l'identifiant.
  */
 export function byArtworkOrder(a: Orderable, b: Orderable): number {
   const na = artworkNumber(a);
   const nb = artworkNumber(b);
-  if (na !== null && nb !== null) return nb - na;
+  if (na !== null && nb !== null) return na - nb;
   if (na !== null) return -1;
   if (nb !== null) return 1;
-  return (b._createdAt ?? "").localeCompare(a._createdAt ?? "");
+  return (a._createdAt ?? "").localeCompare(b._createdAt ?? "");
 }
 
 export function sortArtworks<T extends Orderable>(artworks: T[]): T[] {
