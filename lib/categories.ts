@@ -45,7 +45,9 @@ export const CATEGORIES: Category[] = [
       "concretions",
       "endroit-envers",
       "le-temps-inacheve",
-      "la-divine-comedie",
+      // Ex-« la-divine-comedie » : Bernard a réutilisé cette rubrique pour
+      // « Les tentures » le 09/08/2026, son adresse a été remise au propre.
+      "les-tentures",
       "les-anomalies",
       "les",
       "les-angles",

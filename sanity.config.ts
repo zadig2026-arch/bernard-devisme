@@ -6,6 +6,7 @@ import { frFRLocale } from "@sanity/locale-fr-fr";
 import { dataset, projectId } from "@/sanity/env";
 import { schema } from "@/sanity/schemaTypes";
 import { structure } from "@/sanity/structure";
+import { studioTheme } from "@/sanity/theme";
 
 export default defineConfig({
   basePath: "/studio",
@@ -40,7 +41,9 @@ export default defineConfig({
   // Studio épuré et en français : navigation sur mesure, interface traduite,
   // sans l'outil technique Vision.
   plugins: [structureTool({ structure }), frFRLocale()],
-  // Thème par défaut (blanc) : Bernard a répondu « je conserve l'affichage
-  // blanc » le 01/08/2026, on ne recolore pas son Studio.
+  // Fond blanc conservé (« je conserve l'affichage blanc », 01/08/2026) ; seules
+  // les COMMANDES sont contrastées, à sa demande du 08/08/2026. Voir
+  // sanity/theme.ts et app/studio/lisibilite.css.
+  theme: studioTheme,
   title: "Bernard Devisme — Studio",
 });

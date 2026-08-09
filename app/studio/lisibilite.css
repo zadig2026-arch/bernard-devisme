@@ -1,0 +1,82 @@
+/**
+ * Lisibilité du Studio — demande de Bernard du 08/08/2026 : « les icônes (+ ou
+ * … etc) sont très peu visibles […] la police est fine ».
+ *
+ * Le thème Sanity (`sanity/theme.ts`) ne pilote que des couleurs. Tout ce qui
+ * relève de la TAILLE, de l'ÉPAISSEUR et du CONTOUR se règle ici. Ce fichier
+ * n'est chargé que par la page /studio, il ne touche pas le site public.
+ *
+ * Sélecteurs : on vise l'attribut `data-ui` de @sanity/ui, pas les classes
+ * générées (elles changent à chaque version) NI le nom de balise — le « + »
+ * d'une colonne est un <a>, celui de la barre du haut un <button>, tous deux
+ * marqués `data-ui="Button"`. Un bouton à icône seule se reconnaît à son
+ * `aria-label` (il n'a pas de texte visible pour le nommer) : c'est exactement
+ * l'ensemble que Bernard ne voit pas.
+ *
+ * Vérifié dans le Studio réel avant livraison. Si une règle cesse d'avoir effet
+ * après une mise à jour de Sanity, c'est ici qu'il faut regarder en premier.
+ */
+
+/* Les commandes à icône seule : le + de création, la loupe, les ⋯ des menus.
+   Sans contour ni fond, elles se lisent comme du décor sur du blanc.
+   Deux familles :
+   - `[data-ui="Button"][aria-label]` : un bouton sans texte visible se nomme
+     forcément par un aria-label, c'est le repère des boutons à icône seule ;
+   - `[data-ui="MenuButton"]` : dans ce Studio, tous déclenchent un menu, et
+     ceux des lignes de liste (le ⋯ d'une image) n'ont PAS d'aria-label — les
+     inclure en bloc est le seul moyen de les attraper. */
+#sanity [data-ui="Button"][aria-label]:has(svg),
+#sanity [data-ui="MenuButton"] {
+  border: 1px solid #b0a89f;
+  background-color: #f4f1ee;
+  color: #1b1b1b;
+}
+
+#sanity [data-ui="Button"][aria-label]:has(svg):hover,
+#sanity [data-ui="MenuButton"]:hover {
+  border-color: #8a3a1e;
+  background-color: #f0e4de;
+}
+
+/* Un bouton désactivé doit rester visiblement désactivé : « Publier » est gris
+   tant qu'il n'y a rien à publier, et c'est une information utile. */
+#sanity [data-ui="Button"][disabled],
+#sanity [data-ui="MenuButton"][disabled] {
+  border-color: #d6d2cd;
+  background-color: transparent;
+}
+
+/* Le dessin de l'icône lui-même, agrandi dans le bouton. */
+#sanity [data-ui="Button"][aria-label]:has(svg) svg,
+#sanity [data-ui="MenuButton"] svg {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+/* Sanity affiche beaucoup d'icônes en semi-transparent : sur fond blanc elles
+   disparaissent. */
+#sanity svg {
+  opacity: 1;
+}
+
+/* « la police est fine » : les libellés de champs et les textes secondaires
+   sortent en gris clair. On les ramène à un gris franc, sans toucher au fond
+   blanc qu'il a demandé à conserver le 01/08/2026. */
+#sanity [data-ui="Text"],
+#sanity [data-ui="Label"],
+#sanity label {
+  color: #1b1b1b;
+}
+
+#sanity [data-ui="Label"],
+#sanity label {
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+/* L'anneau de focus par défaut est un liseré pâle : à la souris comme au
+   clavier, on ne sait pas sur quoi on est. */
+#sanity *:focus-visible {
+  outline: 2px solid #8a3a1e;
+  outline-offset: 1px;
+}

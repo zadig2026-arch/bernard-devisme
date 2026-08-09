@@ -7,6 +7,8 @@
 
 import { NextStudio } from "next-sanity/studio";
 import config from "../../../sanity.config";
+// Lisibilité des commandes du Studio (demande de Bernard du 08/08/2026).
+import "../lisibilite.css";
 
 export const dynamic = "force-static";
 
