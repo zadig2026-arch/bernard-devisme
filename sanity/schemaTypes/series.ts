@@ -1,11 +1,15 @@
 import { createElement } from "react";
 import { defineField, defineType } from "sanity";
 import { SeriesFirstArtworkThumb } from "../components/series-thumb";
+import { SeriesInputWithDelete } from "../components/series-input-with-delete";
 
 export const series = defineType({
   name: "series",
   title: "Série",
   type: "document",
+  // Bouton « Supprimer cette rubrique et ses œuvres » en bas de la fiche
+  // (demande de Bernard du 13/08/2026, avec confirmation chiffrée).
+  components: { input: SeriesInputWithDelete },
   fields: [
     defineField({ name: "title", title: "Titre", type: "string", validation: (r) => r.required() }),
     defineField({
@@ -18,7 +22,7 @@ export const series = defineType({
         list: [
           { title: "Peinture", value: "peinture" },
           { title: "Sculpture", value: "sculpture" },
-          { title: "Graphisme", value: "graphisme" },
+          { title: "Dessin", value: "dessin" },
           { title: "Infographies", value: "infographies" },
           { title: "Livres-objets et plus", value: "livres-objets" },
         ],

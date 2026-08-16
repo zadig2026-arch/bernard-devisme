@@ -3,7 +3,7 @@ import Link from "next/link";
 const NAV = [
   { href: "/oeuvres/peinture", label: "Peinture" },
   { href: "/oeuvres/sculpture", label: "Sculpture" },
-  { href: "/oeuvres/graphisme", label: "Graphisme" },
+  { href: "/oeuvres/dessin", label: "Dessin" },
   { href: "/oeuvres/infographies", label: "Infographies" },
   { href: "/oeuvres/livres-objets", label: "Livres-objets et plus" },
   { href: "/parcours", label: "Parcours et CV" },

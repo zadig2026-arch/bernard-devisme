@@ -80,3 +80,15 @@
   outline: 2px solid #8a3a1e;
   outline-offset: 1px;
 }
+
+/* Demande de Bernard du 13/08/2026 : « il y a plein de signes cachés que l'on
+   découvre par hasard lorsque l'on passe dessus — peuvent-ils être visibles
+   tout le temps ? ». Il parle des actions de champ (le ⋯ « Field actions » et
+   la bulle de commentaire à côté de chaque libellé), que Sanity n'affiche
+   qu'au survol du champ. Deux étages les masquent, vérifiés dans le Studio
+   réel : le conteneur `FieldActionsFlex` ET une `Card` parente, tous deux en
+   opacity 0 hors survol (avec transition). On force les deux. */
+#sanity [data-ui="FieldActionsFlex"],
+#sanity [data-ui="Card"]:has([data-testid^="field-actions-menu"]) {
+  opacity: 1 !important;
+}

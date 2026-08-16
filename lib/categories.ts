@@ -73,8 +73,10 @@ export const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: "graphisme",
-    title: "Graphisme",
+    // Ex-« Graphisme », renommée « Dessin » à la demande de Bernard (13/08/2026).
+    // L'ancienne adresse /oeuvres/graphisme redirige (next.config.ts).
+    id: "dessin",
+    title: "Dessin",
     slugs: [
       "les-caboches",
       "dessins-2-1",

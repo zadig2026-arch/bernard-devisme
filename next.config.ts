@@ -15,6 +15,8 @@ const nextConfig: NextConfig = {
       { source: "/pages/agent/:path*", destination: "/agent", permanent: true },
       { source: "/livredor", destination: "/contact", permanent: true },
       { source: "/series", destination: "/oeuvres", permanent: true },
+      // « Graphisme » renommé « Dessin » le 13/08/2026 (demande de Bernard).
+      { source: "/oeuvres/graphisme", destination: "/oeuvres/dessin", permanent: true },
     ];
   },
 };
