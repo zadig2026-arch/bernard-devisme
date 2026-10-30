@@ -25,6 +25,20 @@ export function albumNumber(title: string): number | null {
   return m ? Number(m[1]) : null;
 }
 
+/**
+ * Année qui ouvre le titre d'une rubrique, ex. « 2024_peintures (1438-1504) »
+ * → 2024, « 1994/2021_La Divine Comédie » → 1994, « 1966......les années
+ * peintures à l'huile » → 1966. Depuis octobre 2026, Bernard date ainsi
+ * toutes ses rubriques de peinture et veut les voir du plus récent au plus
+ * ancien, 2026 en haut (mails des 26 et 29/10/2026). Une rubrique « 2027_… »
+ * créée plus tard se placera donc toute seule en tête, sans toucher au code.
+ * Les rubriques sans année gardent l'ordre historique, à la suite.
+ */
+export function leadingYear(title: string): number | null {
+  const m = title.trim().match(/^((?:19|20)\d{2})(?!\d)/);
+  return m ? Number(m[1]) : null;
+}
+
 export const CATEGORIES: Category[] = [
   {
     id: "peinture",

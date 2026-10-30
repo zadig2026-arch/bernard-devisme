@@ -33,10 +33,51 @@ function paragraphs(text?: string): string[] {
   return (text ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
 }
 
+/** Première année d'un repère (« 1972–2007 » → 1972, « 1990s– » → 1990). */
+function firstYear(s?: string): number | null {
+  const m = (s ?? "").match(/(?:19|20)\d{2}/);
+  return m ? Number(m[0]) : null;
+}
+
+/**
+ * Remet un repère d'aplomb quand Bernard a tout tapé dans « Texte » avec
+ * l'année sur la première ligne (son mail du 29/10/2026) : l'année remonte
+ * dans sa case, le reste devient le texte.
+ */
+function normalize(r: Repere): Repere {
+  if (r.year?.trim()) return r;
+  const lines = (r.body ?? "").split("\n");
+  const first = lines[0]?.trim() ?? "";
+  if (/^(?:19|20)\d{2}(?:\s*[–\-/]\s*(?:(?:19|20)\d{2})?)?$/.test(first)) {
+    return { year: first, body: lines.slice(1).join("\n").trim() };
+  }
+  return r;
+}
+
+/**
+ * Du plus récent au plus ancien (2026 en haut), quel que soit l'ordre dans le
+ * Studio : demande de Bernard du 29/10/2026. Les repères sans année restent
+ * à la fin, dans leur ordre de saisie. Le tri est stable : deux repères de la
+ * même année gardent leur ordre du Studio.
+ */
+function sortReperes(reperes: Repere[]): Repere[] {
+  return reperes
+    .map(normalize)
+    .filter((r) => r.year || r.body)
+    .map((r, i) => ({ r, i, y: firstYear(r.year) }))
+    .sort((a, b) => {
+      if (a.y === null && b.y === null) return a.i - b.i;
+      if (a.y === null) return 1;
+      if (b.y === null) return -1;
+      return b.y - a.y || a.i - b.i;
+    })
+    .map(({ r }) => r);
+}
+
 export default async function ParcoursPage() {
   const data = (await sanityFetch<Parcours | null>(parcoursQuery, {}, FALLBACK)) ?? FALLBACK;
   const intro = data.intro?.trim() ? data.intro : FALLBACK.intro;
-  const reperes = data.reperes?.length ? data.reperes : FALLBACK.reperes!;
+  const reperes = sortReperes(data.reperes?.length ? data.reperes : FALLBACK.reperes!);
   const demarche = data.demarche?.trim() ? data.demarche : FALLBACK.demarche;
 
   return (
@@ -90,7 +131,9 @@ function Item({ year, body }: { year?: string; body?: string }) {
         className="absolute -left-[31px] top-2 h-2 w-2 rounded-full bg-[color:var(--color-ink)]"
       />
       {year && <p className="eyebrow">{year}</p>}
-      {body && <p className="mt-1">{body}</p>}
+      {/* `whitespace-pre-line` : les retours à la ligne tapés au Studio sont
+          respectés (Bernard les perdait, mail du 29/10/2026). */}
+      {body && <p className="mt-1 whitespace-pre-line">{body}</p>}
     </li>
   );
 }

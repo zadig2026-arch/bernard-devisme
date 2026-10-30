@@ -16,6 +16,8 @@ export type GalleryItem = {
   videoUrl?: string;
   dimensions?: string;
   saleStatus?: "available" | "sold";
+  /** Œuvre ajoutée récemment (lib/novelty.ts) : petite mention « Nouveau » sur la vignette. */
+  isNew?: boolean;
 };
 
 /**
@@ -85,6 +87,11 @@ export function SeriesGallery({ groups }: { groups: GalleryGroup[] }) {
                         sizes="(min-width: 1280px) 14vw, (min-width: 768px) 20vw, 33vw"
                         className="object-contain p-2 transition-transform duration-500 group-hover:scale-[1.03]"
                       />
+                      {item.isNew && (
+                        <span className="absolute left-2 top-2 bg-[color:var(--color-accent)] px-1.5 py-0.5 font-sans text-[0.6rem] uppercase tracking-[0.14em] text-white">
+                          Nouveau
+                        </span>
+                      )}
                     </div>
                     {(item.title || item.year) && (
                       <div className="mt-2 flex items-baseline justify-between gap-2 text-sm">

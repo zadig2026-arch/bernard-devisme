@@ -21,13 +21,25 @@ export const parcours = defineType({
       name: "reperes",
       title: "Repères (frise chronologique)",
       type: "array",
-      description: "Chaque ligne : une année (ou une période) et son texte.",
+      description:
+        "Une ligne par année (ou période) : l'année dans « Année », le texte dans « Texte ». Le site les affiche du plus récent au plus ancien (2026 en haut), quel que soit l'ordre ici.",
       of: [
         {
           type: "object",
           fields: [
-            defineField({ name: "year", title: "Année", type: "string" }),
-            defineField({ name: "body", title: "Texte", type: "text", rows: 2 }),
+            defineField({
+              name: "year",
+              title: "Année",
+              type: "string",
+              description: "Ex. 2026, ou une période : 1972–2007.",
+            }),
+            defineField({
+              name: "body",
+              title: "Texte",
+              type: "text",
+              rows: 3,
+              description: "Les retours à la ligne sont conservés sur le site.",
+            }),
           ],
           preview: { select: { title: "year", subtitle: "body" } },
         },

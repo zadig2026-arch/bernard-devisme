@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { sanityFetch } from "@/sanity/lib/fetch";
 import { groq } from "next-sanity";
+import { RECENT_ARTWORK_FILTER } from "@/lib/novelty";
 
 type SeriesEntry = {
   _id: string;
@@ -8,6 +9,8 @@ type SeriesEntry = {
   slug: string;
   category?: string;
   count: number;
+  /** Œuvres ajoutées récemment (voir lib/novelty.ts) : > 0 = signal « nouveautés ». */
+  newCount: number;
 };
 
 const allSeriesQuery = groq`*[_type == "series"]{
@@ -15,11 +18,12 @@ const allSeriesQuery = groq`*[_type == "series"]{
   title,
   "slug": slug.current,
   category,
-  "count": count(*[_type == "artwork" && references(^._id)])
+  "count": count(*[_type == "artwork" && references(^._id)]),
+  "newCount": count(*[_type == "artwork" && references(^._id) && ${RECENT_ARTWORK_FILTER}])
 }`;
 
 // Mapping catégorie → séries partagé avec la navigation du Studio.
-import { CATEGORIES, albumNumber } from "@/lib/categories";
+import { CATEGORIES, albumNumber, leadingYear } from "@/lib/categories";
 
 export async function SeriesIndex({ categoryId, showTitles = true }: { categoryId?: string; showTitles?: boolean } = {}) {
   const all = await sanityFetch<SeriesEntry[]>(allSeriesQuery, {}, []);
@@ -29,29 +33,38 @@ export async function SeriesIndex({ categoryId, showTitles = true }: { categoryI
   const cats = categoryId ? CATEGORIES.filter((c) => c.id === categoryId) : CATEGORIES;
   const knownIds = new Set(CATEGORIES.map((c) => c.id));
 
-  // L'appartenance vient du champ `category` (Sanity, éditable par Bernard) ;
-  // la liste de slugs historique ne sert plus qu'à préserver l'ordre
-  // d'affichage de l'ancien site, les nouvelles rubriques venant à la suite.
+  // L'appartenance vient du champ `category` (Sanity, éditable par Bernard).
   //
-  // Exception : les « albums » numérotés de peintures passent en tête, du plus
-  // récent au plus ancien (demande de Bernard). C'est calculé à partir du
-  // numéro dans le titre, donc un « peintures album 7 » créé plus tard se
-  // place tout seul en haut, sans intervention.
+  // Ordre dans une partie (demandes de Bernard, 25/07 puis 26/10/2026) :
+  //  1. les rubriques dont le titre commence par une année, de la plus
+  //     récente à la plus ancienne (2026 en haut) : c'est ainsi qu'il nomme
+  //     désormais toutes ses rubriques de peinture, et une rubrique « 2027_… »
+  //     se placera toute seule en tête ;
+  //  2. puis les « albums » numérotés, du plus grand numéro au plus petit ;
+  //  3. puis l'ordre historique de l'ancien site (liste de slugs), les
+  //     nouvelles rubriques sans année venant à la suite, par ordre
+  //     alphabétique.
+  // Tout est lu dans le titre, rien à saisir pour Bernard.
   const itemsOf = (cat: (typeof CATEGORIES)[number]) => {
     const legacyOrder = new Map(cat.slugs.map((s, i) => [s, i]));
     const rank = (s: SeriesEntry) =>
-      albumNumber(s.title) !== null
-        ? -1
-        : (legacyOrder.get(s.slug) ?? Number.MAX_SAFE_INTEGER);
+      leadingYear(s.title) !== null
+        ? -2
+        : albumNumber(s.title) !== null
+          ? -1
+          : (legacyOrder.get(s.slug) ?? Number.MAX_SAFE_INTEGER);
     return all
       .filter((s) => s.category === cat.id && s.count > 0)
       .sort((a, b) => {
         const ra = rank(a);
         const rb = rank(b);
         if (ra !== rb) return ra - rb;
+        const ya = leadingYear(a.title);
+        const yb = leadingYear(b.title);
+        if (ya !== null && yb !== null && ya !== yb) return yb - ya; // 2026, 2025, 2024…
         const na = albumNumber(a.title);
         const nb = albumNumber(b.title);
-        if (na !== null && nb !== null) return nb - na; // 7, 6, 5…
+        if (na !== null && nb !== null && na !== nb) return nb - na; // 7, 6, 5…
         return a.title.localeCompare(b.title, "fr");
       });
   };
@@ -107,13 +120,31 @@ function CategoryBlock({ id, title, items, showTitle = true }: { id: string; tit
           <li key={s._id} className="border-b border-[color:var(--color-rule)]">
             <Link
               href={`/series/${s.slug}`}
-              className="block py-2 heading-display italic text-base md:text-lg text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
+              className="flex items-baseline justify-between gap-4 py-2 heading-display italic text-base md:text-lg text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
             >
-              {s.title}
+              <span>{s.title}</span>
+              {s.newCount > 0 && <NewBadge count={s.newCount} />}
             </Link>
           </li>
         ))}
       </ul>
     </section>
+  );
+}
+
+/**
+ * Le signal « nouveautés » d'une rubrique : des images y ont été ajoutées
+ * dans les NEW_DAYS derniers jours (lib/novelty.ts). Sobre, dans la couleur
+ * d'accent, pour attirer l'œil sans crier.
+ */
+function NewBadge({ count }: { count: number }) {
+  return (
+    <span
+      className="shrink-0 inline-flex items-center gap-1.5 not-italic font-sans text-[0.65rem] uppercase tracking-[0.14em] text-[color:var(--color-accent)]"
+      title={`${count} nouvelle${count > 1 ? "s" : ""} image${count > 1 ? "s" : ""}`}
+    >
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent)]" />
+      Nouveautés
+    </span>
   );
 }

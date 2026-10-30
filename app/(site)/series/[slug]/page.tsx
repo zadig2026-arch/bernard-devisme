@@ -6,6 +6,7 @@ import { sanityFetch } from "@/sanity/lib/fetch";
 import { seriesBySlugQuery, allSeriesSlugsQuery } from "@/sanity/lib/queries";
 import { urlForImage } from "@/sanity/lib/image";
 import { sortArtworks } from "@/lib/artwork-order";
+import { isRecent } from "@/lib/novelty";
 
 type Artwork = {
   _id: string;
@@ -58,6 +59,7 @@ export default async function SeriesPage({ params }: { params: Promise<{ slug: s
     videoUrl: a.videoUrl,
     dimensions: a.dimensions,
     saleStatus: a.saleStatus,
+    isNew: isRecent(a._createdAt),
   });
 
   // Du plus récent au plus ancien, d'après le numéro de l'œuvre (voir
