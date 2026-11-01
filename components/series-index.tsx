@@ -120,7 +120,7 @@ function CategoryBlock({ id, title, items, showTitle = true }: { id: string; tit
           <li key={s._id} className="border-b border-[color:var(--color-rule)]">
             <Link
               href={`/series/${s.slug}`}
-              className="flex items-baseline justify-between gap-4 py-2 heading-display italic text-base md:text-lg text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-2 heading-display italic text-base md:text-lg text-[color:var(--color-ink)] transition-colors hover:text-[color:var(--color-accent)]"
             >
               <span>{s.title}</span>
               {s.newCount > 0 && <NewBadge count={s.newCount} />}
@@ -134,16 +134,20 @@ function CategoryBlock({ id, title, items, showTitle = true }: { id: string; tit
 
 /**
  * Le signal « nouveautés » d'une rubrique : des images y ont été ajoutées
- * dans les NEW_DAYS derniers jours (lib/novelty.ts). Sobre, dans la couleur
- * d'accent, pour attirer l'œil sans crier.
+ * dans les NEW_DAYS derniers jours (lib/novelty.ts).
+ *
+ * Collé au titre, en pastille pleine (même style que la mention « Nouveau »
+ * sur les vignettes, components/series-gallery.tsx). La première version,
+ * en petit texte sienne à l'extrême droite de la ligne, était invisible
+ * pour Bernard (mail du 01/11/2026) : à 1 200 px du titre, l'œil ne fait
+ * pas le lien.
  */
 function NewBadge({ count }: { count: number }) {
   return (
     <span
-      className="shrink-0 inline-flex items-center gap-1.5 not-italic font-sans text-[0.65rem] uppercase tracking-[0.14em] text-[color:var(--color-accent)]"
+      className="inline-block shrink-0 translate-y-[-0.15em] bg-[color:var(--color-accent)] px-2 py-0.5 not-italic font-sans text-[0.7rem] font-medium uppercase tracking-[0.14em] text-white"
       title={`${count} nouvelle${count > 1 ? "s" : ""} image${count > 1 ? "s" : ""}`}
     >
-      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent)]" />
       Nouveautés
     </span>
   );
